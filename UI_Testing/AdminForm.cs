@@ -28,6 +28,7 @@ namespace UI_Testing
         public AdminForm(string? _login, string? _password)
         {
             InitializeComponent();
+            toolStripMenuItem2.Enabled = true;
             login = _login;
             password = _password;
         }
@@ -633,14 +634,41 @@ namespace UI_Testing
                 return input;
             }
         }
-        private string FixEncoding(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-                return input;
 
-            return Encoding.UTF8.GetString(
-                Encoding.GetEncoding(1252).GetBytes(input)
-            );
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            materialLabel1.Visible = false;
+            materialLabel2.Visible = false;
+            dateTimePicker1.Visible = false;
+            dateTimePicker2.Visible = false;
+            radioMonth.Visible = false;
+            radioPrevMonth.Visible = false;
+            radioWeek.Visible = false;
+            materialButton1.Visible = false;
+            materialButton2.Name = "Оценить";
+            tabControl1.TabPages.Clear();
+            this.Text = "Оценка";
+            toolStripMenuItem1.Enabled = true;
+            toolStripMenuItem2.Enabled = false;
+            toolTip1.SetToolTip(materialTextBox1, "Пример QA-1111 или 1111");
+        }
+
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            materialLabel1.Visible = false;
+            materialLabel2.Visible = false;
+            dateTimePicker1.Visible = false;
+            dateTimePicker2.Visible = false;
+            radioMonth.Visible = false;
+            radioPrevMonth.Visible = false;
+            radioWeek.Visible = false;
+            materialButton1.Visible = false;
+            materialButton2.Name = "Поиск";
+            tabControl1.TabPages.Clear();
+            this.Text = "Отчет за месяц";
+            toolStripMenuItem1.Enabled = false;
+            toolStripMenuItem2.Enabled = true;
+            toolTip1.SetToolTip(materialTextBox1, "Пример QA-1111");
         }
     }
 

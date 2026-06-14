@@ -30,26 +30,26 @@
         {
             this.components = new System.ComponentModel.Container();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.materialLabel3 = new MaterialSkin.Controls.MaterialLabel();
             this.materialLabel1 = new MaterialSkin.Controls.MaterialLabel();
             this.materialLabel2 = new MaterialSkin.Controls.MaterialLabel();
             this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
             this.dateTimePicker2 = new System.Windows.Forms.DateTimePicker();
             this.materialButton1 = new MaterialSkin.Controls.MaterialButton();
-            this.menuStrip = new System.Windows.Forms.MenuStrip();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
             this.radioWeek = new System.Windows.Forms.RadioButton();
             this.radioMonth = new System.Windows.Forms.RadioButton();
             this.radioPrevMonth = new System.Windows.Forms.RadioButton();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
             this.materialTextBox1 = new MaterialSkin.Controls.MaterialTextBox();
             this.materialButton2 = new MaterialSkin.Controls.MaterialButton();
-            this.materialLabel3 = new MaterialSkin.Controls.MaterialLabel();
+            this.menuStrip = new System.Windows.Forms.MenuStrip();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.tableLayoutPanel1.SuspendLayout();
-            this.menuStrip.SuspendLayout();
             this.tabControl1.SuspendLayout();
+            this.menuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -60,7 +60,7 @@
             this.tableLayoutPanel1.ColumnCount = 3;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 39.03394F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60.96606F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 423F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 425F));
             this.tableLayoutPanel1.Controls.Add(this.materialLabel3, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.materialLabel1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.materialLabel2, 0, 2);
@@ -83,6 +83,18 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 77.60968F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1190, 661);
             this.tableLayoutPanel1.TabIndex = 0;
+            // 
+            // materialLabel3
+            // 
+            this.materialLabel3.AutoSize = true;
+            this.materialLabel3.Depth = 0;
+            this.materialLabel3.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.materialLabel3.Location = new System.Drawing.Point(767, 0);
+            this.materialLabel3.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialLabel3.Name = "materialLabel3";
+            this.materialLabel3.Size = new System.Drawing.Size(88, 19);
+            this.materialLabel3.TabIndex = 12;
+            this.materialLabel3.Text = "Код задачи";
             // 
             // materialLabel1
             // 
@@ -134,7 +146,7 @@
             this.materialButton1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.materialButton1.HighEmphasis = true;
             this.materialButton1.Icon = null;
-            this.materialButton1.Location = new System.Drawing.Point(420, 101);
+            this.materialButton1.Location = new System.Drawing.Point(419, 101);
             this.materialButton1.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.materialButton1.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialButton1.Name = "materialButton1";
@@ -146,33 +158,6 @@
             this.materialButton1.UseAccentColor = false;
             this.materialButton1.UseVisualStyleBackColor = true;
             this.materialButton1.Click += new System.EventHandler(this.materialButton1_Click);
-            // 
-            // menuStrip
-            // 
-            this.menuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem2,
-            this.toolStripMenuItem1});
-            this.menuStrip.Location = new System.Drawing.Point(4, 79);
-            this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Padding = new System.Windows.Forms.Padding(1, 0, 0, 0);
-            this.menuStrip.Size = new System.Drawing.Size(1193, 32);
-            this.menuStrip.TabIndex = 10;
-            this.menuStrip.Text = "menuStrip";
-            // 
-            // toolStripMenuItem2
-            // 
-            this.toolStripMenuItem2.Font = new System.Drawing.Font("Segoe UI", 12F);
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(162, 32);
-            this.toolStripMenuItem2.Text = "Отчет за месяц";
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Font = new System.Drawing.Font("Segoe UI", 12F);
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(95, 32);
-            this.toolStripMenuItem1.Text = "Оценка";
             // 
             // tabControl1
             // 
@@ -188,11 +173,21 @@
             this.tabControl1.Size = new System.Drawing.Size(1184, 508);
             this.tabControl1.TabIndex = 6;
             // 
+            // tabPage1
+            // 
+            this.tabPage1.Location = new System.Drawing.Point(4, 26);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(1176, 478);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "tabPage1";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
             // radioWeek
             // 
             this.radioWeek.AutoSize = true;
             this.radioWeek.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.radioWeek.Location = new System.Drawing.Point(302, 3);
+            this.radioWeek.Location = new System.Drawing.Point(301, 3);
             this.radioWeek.Name = "radioWeek";
             this.radioWeek.Size = new System.Drawing.Size(167, 22);
             this.radioWeek.TabIndex = 7;
@@ -204,7 +199,7 @@
             // 
             this.radioMonth.AutoSize = true;
             this.radioMonth.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.radioMonth.Location = new System.Drawing.Point(302, 31);
+            this.radioMonth.Location = new System.Drawing.Point(301, 31);
             this.radioMonth.Name = "radioMonth";
             this.radioMonth.Size = new System.Drawing.Size(155, 22);
             this.radioMonth.TabIndex = 8;
@@ -216,23 +211,13 @@
             // 
             this.radioPrevMonth.AutoSize = true;
             this.radioPrevMonth.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.radioPrevMonth.Location = new System.Drawing.Point(302, 68);
+            this.radioPrevMonth.Location = new System.Drawing.Point(301, 68);
             this.radioPrevMonth.Name = "radioPrevMonth";
             this.radioPrevMonth.Size = new System.Drawing.Size(162, 22);
             this.radioPrevMonth.TabIndex = 9;
             this.radioPrevMonth.Text = "За прошлый месяц";
             this.radioPrevMonth.UseVisualStyleBackColor = true;
             this.radioPrevMonth.CheckedChanged += new System.EventHandler(this.UpdateDateRange);
-            // 
-            // tabPage1
-            // 
-            this.tabPage1.Location = new System.Drawing.Point(4, 26);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1176, 478);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "tabPage1";
-            this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // materialTextBox1
             // 
@@ -241,7 +226,7 @@
             this.materialTextBox1.Depth = 0;
             this.materialTextBox1.Font = new System.Drawing.Font("Roboto", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.materialTextBox1.LeadingIcon = null;
-            this.materialTextBox1.Location = new System.Drawing.Point(769, 31);
+            this.materialTextBox1.Location = new System.Drawing.Point(767, 31);
             this.materialTextBox1.MaxLength = 50;
             this.materialTextBox1.MouseState = MaterialSkin.MouseState.OUT;
             this.materialTextBox1.Multiline = false;
@@ -263,7 +248,7 @@
             this.materialButton2.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.materialButton2.HighEmphasis = true;
             this.materialButton2.Icon = null;
-            this.materialButton2.Location = new System.Drawing.Point(866, 101);
+            this.materialButton2.Location = new System.Drawing.Point(865, 101);
             this.materialButton2.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.materialButton2.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialButton2.Name = "materialButton2";
@@ -276,17 +261,34 @@
             this.materialButton2.UseVisualStyleBackColor = true;
             this.materialButton2.Click += new System.EventHandler(this.materialButton2_Click);
             // 
-            // materialLabel3
+            // menuStrip
             // 
-            this.materialLabel3.AutoSize = true;
-            this.materialLabel3.Depth = 0;
-            this.materialLabel3.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.materialLabel3.Location = new System.Drawing.Point(769, 0);
-            this.materialLabel3.MouseState = MaterialSkin.MouseState.HOVER;
-            this.materialLabel3.Name = "materialLabel3";
-            this.materialLabel3.Size = new System.Drawing.Size(88, 19);
-            this.materialLabel3.TabIndex = 12;
-            this.materialLabel3.Text = "Код задачи";
+            this.menuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem2,
+            this.toolStripMenuItem1});
+            this.menuStrip.Location = new System.Drawing.Point(4, 79);
+            this.menuStrip.Name = "menuStrip";
+            this.menuStrip.Padding = new System.Windows.Forms.Padding(1, 0, 0, 0);
+            this.menuStrip.Size = new System.Drawing.Size(1193, 32);
+            this.menuStrip.TabIndex = 10;
+            this.menuStrip.Text = "menuStrip";
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(162, 32);
+            this.toolStripMenuItem2.Text = "Отчет за месяц";
+            this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(95, 32);
+            this.toolStripMenuItem1.Text = "Оценка";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
             // AdminForm
             // 
@@ -299,13 +301,13 @@
             this.MinimumSize = new System.Drawing.Size(1201, 782);
             this.Name = "AdminForm";
             this.Padding = new System.Windows.Forms.Padding(4, 79, 4, 4);
-            this.Text = "AdminForm";
+            this.Text = "Отчет за месяц";
             this.Load += new System.EventHandler(this.AdminForm_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            this.tabControl1.ResumeLayout(false);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
-            this.tabControl1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
