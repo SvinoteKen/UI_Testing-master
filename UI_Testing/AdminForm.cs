@@ -1,10 +1,8 @@
 ﻿using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
 using HtmlAgilityPack;
 using MaterialSkin.Controls;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
@@ -12,9 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web.UI.WebControls;
 using System.Windows.Forms;
-using Font = System.Drawing.Font;
 
 namespace UI_Testing
 {
@@ -25,12 +21,15 @@ namespace UI_Testing
         private string? login;
         private string? password;
         private readonly Dictionary<string, ReportStats> reportStats = new Dictionary<string, ReportStats>();
+        private TextBox manualInputTextBox;
         public AdminForm(string? _login, string? _password)
         {
             InitializeComponent();
-            toolStripMenuItem2.Enabled = true;
+            toolStripMenuItem2.Enabled = false;
             login = _login;
             password = _password;
+            this.StartPosition = FormStartPosition.CenterScreen;
+            enterFirst();
         }
 
         private async void materialButton1_Click(object sender, EventArgs e)
@@ -53,9 +52,42 @@ namespace UI_Testing
             UpdateExcelReport(xlsxPath);
 
         }
+        private (string productName, int tasks, int functional, int regression) ParseManualData(string input)
+        {
+            string productName = "(не указано)";
+            int tasks = 0;
+            int functional = 0;
+            int regression = 0;
+
+            // Ищем название релиза после "релиза " (до конца строки)
+            var productMatch = Regex.Match(input, @"релиза\s+(.+?)(?:\r?\n|$)", RegexOptions.IgnoreCase);
+            if (productMatch.Success)
+                productName = productMatch.Groups[1].Value.Trim();
+
+            // Ищем "Количество задач: число"
+            var tasksMatch = Regex.Match(input, @"Количество задач:\s*(\d+)", RegexOptions.IgnoreCase);
+            if (tasksMatch.Success)
+                int.TryParse(tasksMatch.Groups[1].Value, out tasks);
+
+            // Ищем "Количество ФЦ тк: число"
+            var funcMatch = Regex.Match(input, @"Количество ФЦ тк:\s*(\d+)", RegexOptions.IgnoreCase);
+            if (funcMatch.Success)
+                int.TryParse(funcMatch.Groups[1].Value, out functional);
+
+            // Ищем "Количество РЦ тк: число"
+            var regMatch = Regex.Match(input, @"Количество РЦ тк:\s*(\d+)", RegexOptions.IgnoreCase);
+            if (regMatch.Success)
+                int.TryParse(regMatch.Groups[1].Value, out regression);
+
+            return (productName, tasks, functional, regression);
+        }
 
         private void AdminForm_Load(object sender, EventArgs e)
         {
+            ThemeManager.ApplyThemeToForm(this);
+            if (menuStrip != null) // если есть MenuStrip
+                ThemeManager.ApplyThemeToMenuStrip(menuStrip, ThemeManager.CurrentMode);
+
             radioWeek.Checked = true;   // активная по умолчанию
             SetCurrentWeek();
         }
@@ -108,6 +140,7 @@ namespace UI_Testing
                 page.Controls.Add(tb);
 
                 tabControl1.TabPages.Add(page);
+                ThemeManager.ApplyThemeToControl(tb);
             }
         }
         private void UpdateDateRange(object sender, EventArgs e)
@@ -157,15 +190,206 @@ namespace UI_Testing
             dateTimePicker2.Value = end;
         }
 
-        private void materialButton2_Click(object sender, EventArgs e)
+        private async void materialButton2_Click(object sender, EventArgs e)
         {
             string searchKey = materialTextBox1.Text.Trim();
 
-            if (string.IsNullOrEmpty(searchKey))
-                return;
+            if (toolStripMenuItem1.Enabled)
+            {
+                if (string.IsNullOrEmpty(searchKey))
+                    return;
+                OpenIssueTab(searchKey);
+            }
+            else
+            {
+                if (tabControl1.TabPages.Count >= 2)
+                {
+                    tabControl1.TabPages.RemoveAt(1);
+                }
+                if (materialCheckbox1.Checked)
+                {
+                    if (string.IsNullOrEmpty(searchKey))
+                        return;
+                    var jira = new JiraClient(login, password);
+                    var json = await jira.GetIssueJson(searchKey);
+                    var extractor = new ExtractInfoFromTask(json);
 
-            OpenIssueTab(searchKey);
+                    var header = extractor.ExtractReportHeader();
+                    string productName = header.ProductName;
+
+                    string scopeUrl = header.ScopeUrl;
+                    string version = scopeUrl.Substring(scopeUrl.LastIndexOf('/') + 1);
+                    var issues = await jira.GetIssuesByVersion(version);
+                    var resolvedIssues = issues
+                    .Where(i => i.Fields?.Status?.Equals("Resolved", StringComparison.OrdinalIgnoreCase) == true)
+                    .ToList();
+                    int tasks = resolvedIssues.Count;
+
+                    var urls = extractor.ExtractRegressionInfo();
+                    var urls2 = extractor.ExtractCycleUrls();
+
+                    var regressionStats = urls.Count > 0
+                    ? await jira.GetRegressionCycleStats(urls)
+                    : new List<(string Name, int TotalCount, string URL)>();
+
+                    var functionalStats = urls2.Count > 0
+                    ? await jira.GetFunctionalCycleStats(urls2)
+                    : new List<(string Name, int TotalCount, string URL)>();
+
+                    var sb = new StringBuilder();
+
+                    sb.AppendLine(CalculateEstimate(regressionStats, functionalStats, productName, tasks));
+
+                    sb.AppendLine($"Скоуп: {scopeUrl}");
+                    sb.AppendLine($"Количетсво задач в статусе Resolved: {tasks}");
+                    sb.AppendLine();
+                    foreach (var stats in functionalStats)
+                    {
+                        string cycleInfo = string.IsNullOrWhiteSpace(stats.Name)
+                        ? ""
+                        : $" {stats.Name}";
+                        sb.AppendLine($"Функциональное тестирование в цикле{cycleInfo}: {stats.URL}");
+                        sb.AppendLine($"Количетсво кейсов: {stats.TotalCount}");
+                        sb.AppendLine();
+                    }
+
+                    foreach (var stats in regressionStats)
+                    {
+                        string cycleInfo = string.IsNullOrWhiteSpace(stats.Name)
+                        ? ""
+                        : $" {stats.Name}";
+                        sb.AppendLine($"Регрессионное тестирование в цикле{cycleInfo}: {stats.URL}");
+                        sb.AppendLine($"Количетсво кейсов: {stats.TotalCount}");
+                        sb.AppendLine();
+                    }
+                    var page = new TabPage(
+                    $"Оценка {productName}")
+                    {
+                        Font = tabFont,
+                        Tag = productName
+                    };
+
+                    var tb = new System.Windows.Forms.TextBox
+                    {
+                        Multiline = true,
+                        Dock = DockStyle.Fill,
+                        ScrollBars = System.Windows.Forms.ScrollBars.Vertical,
+                        Font = textFont,
+                        Text = sb.ToString()
+                    };
+
+                    page.Controls.Add(tb);
+
+                    tabControl1.TabPages.Add(page);
+                    tabControl1.SelectedTab = page;
+                }
+                else 
+                {
+                    string input = manualInputTextBox.Text;
+                    // Парсим данные
+                    var (productName, tasksCount, functionalCount, regressionCount) = ParseManualData(input);
+                    var functionalStats = new List<(string Name, int TotalCount, string URL)> { ("", functionalCount, "") };
+                    var regressionStats = new List<(string Name, int TotalCount, string URL)> { ("", regressionCount, "") };
+
+                    // Вызываем метод полного отчёта (тот же, что для автоматической оценки)
+                    string report = CalculateEstimate(regressionStats, functionalStats, productName, tasksCount);
+                    var page = new TabPage(
+                    $"Оценка {productName}")
+                    {
+                        Font = tabFont,
+                        Tag = productName
+                    };
+
+                    var tb = new System.Windows.Forms.TextBox
+                    {
+                        Multiline = true,
+                        Dock = DockStyle.Fill,
+                        ScrollBars = System.Windows.Forms.ScrollBars.Vertical,
+                        Font = textFont,
+                        Text = report
+                    };
+
+                    page.Controls.Add(tb);
+
+                    tabControl1.TabPages.Add(page);
+                    tabControl1.SelectedTab = page;
+                }
+            }
         }
+
+        private static int RoundToNearestHalfHour(int minutes)
+        {
+            double hours = minutes / 60.0;
+            double roundedHours = Math.Round(hours * 2) / 2;
+            return (int)(roundedHours * 60);
+        }
+
+        private static string FormatHalfHours(int minutes)
+        {
+            int hours = minutes / 60;
+            int mins = minutes % 60;
+            if (mins == 30)
+                return $"{hours},5";
+            else
+                return hours.ToString();
+        }
+
+        public static string CalculateEstimate(
+            List<(string Name, int TotalCount, string URL)> regressionStats,
+            List<(string Name, int TotalCount, string URL)> functionalStats,
+            string productName, int tasks)
+        {
+            // 1. Сырые минуты на тестирование
+            int regressionMinutes = regressionStats.Sum(r => r.TotalCount * 25);
+            int functionalMinutes = functionalStats.Sum(f => f.TotalCount * 45) + tasks * 45;
+            int testingRawMinutes = regressionMinutes + functionalMinutes;
+
+            // 2. Сырые минуты на дефекты/уточнения/ревью = 30% от сырого тестирования
+            double secondaryRawMinutes = testingRawMinutes * 0.30;
+
+            // 3. Округляем каждую часть до 0.5 часа
+            int testingRoundedMinutes = RoundToNearestHalfHour(testingRawMinutes);
+            int secondaryRoundedMinutes = RoundToNearestHalfHour((int)secondaryRawMinutes);
+
+            // 4. Итог = округлённое тестирование + округлённые дефекты + 30 минут (0.5 часа)
+            int totalMinutes = testingRoundedMinutes + secondaryRoundedMinutes + 30;
+
+            // 5. Итог тоже кратен 30, форматируем
+            string formattedTotal = FormatHalfHours(totalMinutes);
+
+            
+            double secondaryRawHours = secondaryRawMinutes / 60.0;
+            double testingRoundedHours = testingRoundedMinutes / 60.0;
+            double secondaryRoundedHours = secondaryRoundedMinutes / 60.0;
+            double testingRawHours = testingRawMinutes / 60.0;
+            int funcCount = functionalStats.Sum(f => f.TotalCount);
+            int regCount = regressionStats.Sum(r => r.TotalCount);
+            // 6. Формируем отладочное сообщение (как в исходном примере)
+            var sb = new StringBuilder();
+            sb.AppendLine($"Предварительная оценка трудозатрат на тестирование релиза {productName}:");
+            sb.AppendLine($"Оценка - 0,5 чч");
+            sb.AppendLine($"Тестирование - {FormatHalfHours(testingRoundedMinutes)} чч");
+            sb.AppendLine($"Заведение дефектов/уточнения/ревью тестов - {FormatHalfHours(secondaryRoundedMinutes)} чч");
+            sb.AppendLine($"Итого: {formattedTotal} чч");
+            sb.AppendLine();
+            sb.AppendLine("Данные на основе которых был произведен расчет:");
+            sb.AppendLine($"• Функциональное тестирование: ({funcCount} кейсов + {tasks} задач) × 45 мин = {functionalMinutes} мин");
+            sb.AppendLine($"• Регрессионное тестирование: {regCount} кейсов × 25 мин = {regressionMinutes} мин");
+            sb.AppendLine($"• Время тестирования: {functionalMinutes} + {regressionMinutes} = {testingRawMinutes} мин = {testingRawHours:F2} ч");
+            sb.AppendLine($"• Округление до 0,5 ч: {testingRawHours:F2} ч → {testingRoundedHours:F1} ч ({FormatHalfHours(testingRoundedMinutes)} чч)");
+            sb.AppendLine();
+            sb.AppendLine($"• 30% от {testingRawMinutes} мин = {secondaryRawMinutes:F1} мин = {secondaryRawHours:F2} ч");
+            sb.AppendLine($"• Округление до 0,5 ч: {secondaryRawHours:F2} ч → {secondaryRoundedHours:F1} ч ({FormatHalfHours(secondaryRoundedMinutes)} чч)");
+            sb.AppendLine();
+            sb.AppendLine($"• Тестирование (округл.): {FormatHalfHours(testingRoundedMinutes)} чч");
+            sb.AppendLine($"• Дефекты (округл.): {FormatHalfHours(secondaryRoundedMinutes)} чч");
+            sb.AppendLine($"• Оценка: 0,5 чч");
+            sb.AppendLine($"• Сумма: {FormatHalfHours(testingRoundedMinutes)} + {FormatHalfHours(secondaryRoundedMinutes)} + 0,5 = {formattedTotal} чч");
+            sb.AppendLine();
+            return sb.ToString();
+        }
+
+
         private void OpenIssueTab(string issueKey)
         {
             var page = tabControl1.TabPages
@@ -637,23 +861,34 @@ namespace UI_Testing
 
         private void toolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            materialLabel1.Visible = false;
-            materialLabel2.Visible = false;
-            dateTimePicker1.Visible = false;
-            dateTimePicker2.Visible = false;
-            radioMonth.Visible = false;
-            radioPrevMonth.Visible = false;
-            radioWeek.Visible = false;
-            materialButton1.Visible = false;
-            materialButton2.Name = "Оценить";
+            materialLabel1.Visible = true;
+            materialLabel2.Visible = true;
+            dateTimePicker1.Visible = true;
+            dateTimePicker2.Visible = true;
+            radioMonth.Visible = true;
+            radioPrevMonth.Visible = true;
+            radioWeek.Visible = true;
+            materialButton1.Visible = true;
+            materialButton2.Text = "Поиск";
             tabControl1.TabPages.Clear();
-            this.Text = "Оценка";
+            this.Text = "Отчет за месяц";
             toolStripMenuItem1.Enabled = true;
             toolStripMenuItem2.Enabled = false;
             toolTip1.SetToolTip(materialTextBox1, "Пример QA-1111 или 1111");
+            var page = new TabPage(
+            $"Page1")
+            {
+                Font = tabFont
+            };
+            tabControl1.TabPages.Add(page);
+            ThemeManager.ApplyThemeToControl(tabControl1);
         }
 
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            enterFirst();
+        }
+        private void enterFirst()
         {
             materialLabel1.Visible = false;
             materialLabel2.Visible = false;
@@ -663,12 +898,35 @@ namespace UI_Testing
             radioPrevMonth.Visible = false;
             radioWeek.Visible = false;
             materialButton1.Visible = false;
-            materialButton2.Name = "Поиск";
+            materialButton2.Text = "Оценить";
             tabControl1.TabPages.Clear();
-            this.Text = "Отчет за месяц";
+            this.Text = "Оценка";
             toolStripMenuItem1.Enabled = false;
             toolStripMenuItem2.Enabled = true;
             toolTip1.SetToolTip(materialTextBox1, "Пример QA-1111");
+            var page = new TabPage(
+            $"Ручная оценка (заполните данные и уберите чекбокс)")
+            {
+                Font = tabFont
+            };
+
+            var txtData = new System.Windows.Forms.TextBox
+            {
+                Multiline = true,
+                Dock = DockStyle.Fill,
+                ScrollBars = System.Windows.Forms.ScrollBars.Vertical,
+                Font = textFont,
+                Text =
+                @"Предварительная оценка трудозатрат на тестирование релиза Название_релиза
+Количество задач: 0
+Количество ФЦ тк: 0
+Количество РЦ тк: 0"
+            };
+            manualInputTextBox = txtData;
+            page.Controls.Add(txtData);
+
+            tabControl1.TabPages.Add(page);
+            ThemeManager.ApplyThemeToControl(txtData);
         }
     }
 

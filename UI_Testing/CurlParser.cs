@@ -7,21 +7,19 @@ using System.Text.RegularExpressions;
 
 public static class CurlParser
 {
-    public static CurlRequest Parse(string filePath)
+    public static CurlRequest Parse(string curlText)
     {
-        var text = File.ReadAllText(filePath);
+        // Приводим многострочный cURL к однострочному виду
+        string text = NormalizeCurlText(curlText);
+
         var result = new CurlRequest();
 
-           // =========================
-             // URL
-             // =========================
-    var urlMatch = Regex.Match(text, @"curl\s+'([^']+)'");
+        // URL
+        var urlMatch = Regex.Match(text, @"curl\s+'([^']+)'");
         if (urlMatch.Success)
             result.Url = urlMatch.Groups[1].Value;
 
-        // =========================
         // HEADERS
-        // =========================
         var headerMatches = Regex.Matches(text, @"-H\s+'((?:\\'|[^'])*)'");
         result.Headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -34,7 +32,7 @@ public static class CurlParser
             var key = full.Substring(0, index).Trim();
             var value = full.Substring(index + 1).Trim();
 
-            // Игнорируем дублирование User-Agent и accept-language
+            // Обработка дублей
             if (key.Equals("User-Agent", StringComparison.OrdinalIgnoreCase) ||
                 key.Equals("accept-language", StringComparison.OrdinalIgnoreCase))
             {
@@ -47,16 +45,12 @@ public static class CurlParser
             }
         }
 
-        // =========================
         // COOKIE
-        // =========================
         var cookieMatch = Regex.Match(text, @"-b\s+'([^']*)'");
         if (cookieMatch.Success)
             result.Cookies = cookieMatch.Groups[1].Value;
 
-        // =========================
         // BODY
-        // =========================
         var bodyMatch = Regex.Match(text, @"--data-raw\s+'(.+?)'", RegexOptions.Singleline);
         if (bodyMatch.Success)
         {
@@ -99,6 +93,37 @@ public static class CurlParser
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Преобразует многострочный cURL (с обратными слешами в конце строк) в одну строку.
+    /// </summary>
+    private static string NormalizeCurlText(string curlText)
+    {
+        if (string.IsNullOrEmpty(curlText)) return curlText;
+
+        // Если нет перевода строк – возвращаем как есть
+        if (!curlText.Contains('\n') && !curlText.Contains('\r'))
+            return curlText;
+
+        var lines = curlText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+        for (int i = 0; i < lines.Length; i++)
+        {
+            // Удаляем пробелы и табы в конце строки
+            lines[i] = lines[i].TrimEnd();
+            // Если строка заканчивается на обратный слеш – удаляем его (символ продолжения)
+            if (lines[i].EndsWith("\\"))
+                lines[i] = lines[i].Substring(0, lines[i].Length - 1);
+        }
+        // Склеиваем через пробел
+        return string.Join(" ", lines);
+    }
+
+    // Перегрузка для чтения из файла (для совместимости)
+    public static CurlRequest ParseFromFile(string filePath)
+    {
+        var text = File.ReadAllText(filePath);
+        return Parse(text);
     }
 }
 

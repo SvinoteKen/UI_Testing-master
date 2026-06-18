@@ -41,8 +41,9 @@
             this.radioWeek = new System.Windows.Forms.RadioButton();
             this.radioMonth = new System.Windows.Forms.RadioButton();
             this.radioPrevMonth = new System.Windows.Forms.RadioButton();
-            this.materialTextBox1 = new MaterialSkin.Controls.MaterialTextBox();
             this.materialButton2 = new MaterialSkin.Controls.MaterialButton();
+            this.materialTextBox1 = new MaterialSkin.Controls.MaterialTextBox();
+            this.materialCheckbox1 = new MaterialSkin.Controls.MaterialCheckbox();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -57,10 +58,11 @@
             this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.ColumnCount = 3;
+            this.tableLayoutPanel1.ColumnCount = 4;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 39.03394F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60.96606F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 425F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 311F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 172F));
             this.tableLayoutPanel1.Controls.Add(this.materialLabel3, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.materialLabel1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.materialLabel2, 0, 2);
@@ -71,8 +73,9 @@
             this.tableLayoutPanel1.Controls.Add(this.radioWeek, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.radioMonth, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.radioPrevMonth, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.materialTextBox1, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.materialButton2, 2, 3);
+            this.tableLayoutPanel1.Controls.Add(this.materialTextBox1, 2, 1);
+            this.tableLayoutPanel1.Controls.Add(this.materialCheckbox1, 3, 3);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(4, 114);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 5;
@@ -89,7 +92,7 @@
             this.materialLabel3.AutoSize = true;
             this.materialLabel3.Depth = 0;
             this.materialLabel3.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.materialLabel3.Location = new System.Drawing.Point(767, 0);
+            this.materialLabel3.Location = new System.Drawing.Point(709, 0);
             this.materialLabel3.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialLabel3.Name = "materialLabel3";
             this.materialLabel3.Size = new System.Drawing.Size(88, 19);
@@ -146,7 +149,7 @@
             this.materialButton1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.materialButton1.HighEmphasis = true;
             this.materialButton1.Icon = null;
-            this.materialButton1.Location = new System.Drawing.Point(419, 101);
+            this.materialButton1.Location = new System.Drawing.Point(378, 101);
             this.materialButton1.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.materialButton1.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialButton1.Name = "materialButton1";
@@ -157,6 +160,7 @@
             this.materialButton1.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.materialButton1.UseAccentColor = false;
             this.materialButton1.UseVisualStyleBackColor = true;
+            this.materialButton1.Visible = false;
             this.materialButton1.Click += new System.EventHandler(this.materialButton1_Click);
             // 
             // tabControl1
@@ -164,7 +168,7 @@
             this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.SetColumnSpan(this.tabControl1, 3);
+            this.tableLayoutPanel1.SetColumnSpan(this.tabControl1, 4);
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.tabControl1.Location = new System.Drawing.Point(3, 150);
@@ -187,7 +191,7 @@
             // 
             this.radioWeek.AutoSize = true;
             this.radioWeek.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.radioWeek.Location = new System.Drawing.Point(301, 3);
+            this.radioWeek.Location = new System.Drawing.Point(278, 3);
             this.radioWeek.Name = "radioWeek";
             this.radioWeek.Size = new System.Drawing.Size(167, 22);
             this.radioWeek.TabIndex = 7;
@@ -199,7 +203,7 @@
             // 
             this.radioMonth.AutoSize = true;
             this.radioMonth.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.radioMonth.Location = new System.Drawing.Point(301, 31);
+            this.radioMonth.Location = new System.Drawing.Point(278, 31);
             this.radioMonth.Name = "radioMonth";
             this.radioMonth.Size = new System.Drawing.Size(155, 22);
             this.radioMonth.TabIndex = 8;
@@ -211,32 +215,13 @@
             // 
             this.radioPrevMonth.AutoSize = true;
             this.radioPrevMonth.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.radioPrevMonth.Location = new System.Drawing.Point(301, 68);
+            this.radioPrevMonth.Location = new System.Drawing.Point(278, 68);
             this.radioPrevMonth.Name = "radioPrevMonth";
             this.radioPrevMonth.Size = new System.Drawing.Size(162, 22);
             this.radioPrevMonth.TabIndex = 9;
             this.radioPrevMonth.Text = "За прошлый месяц";
             this.radioPrevMonth.UseVisualStyleBackColor = true;
             this.radioPrevMonth.CheckedChanged += new System.EventHandler(this.UpdateDateRange);
-            // 
-            // materialTextBox1
-            // 
-            this.materialTextBox1.AnimateReadOnly = false;
-            this.materialTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.materialTextBox1.Depth = 0;
-            this.materialTextBox1.Font = new System.Drawing.Font("Roboto", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.materialTextBox1.LeadingIcon = null;
-            this.materialTextBox1.Location = new System.Drawing.Point(767, 31);
-            this.materialTextBox1.MaxLength = 50;
-            this.materialTextBox1.MouseState = MaterialSkin.MouseState.OUT;
-            this.materialTextBox1.Multiline = false;
-            this.materialTextBox1.Name = "materialTextBox1";
-            this.tableLayoutPanel1.SetRowSpan(this.materialTextBox1, 2);
-            this.materialTextBox1.Size = new System.Drawing.Size(298, 50);
-            this.materialTextBox1.TabIndex = 10;
-            this.materialTextBox1.Text = "";
-            this.toolTip1.SetToolTip(this.materialTextBox1, "Пример QA-1111 или 1111");
-            this.materialTextBox1.TrailingIcon = null;
             // 
             // materialButton2
             // 
@@ -248,7 +233,7 @@
             this.materialButton2.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.materialButton2.HighEmphasis = true;
             this.materialButton2.Icon = null;
-            this.materialButton2.Location = new System.Drawing.Point(865, 101);
+            this.materialButton2.Location = new System.Drawing.Point(749, 101);
             this.materialButton2.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.materialButton2.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialButton2.Name = "materialButton2";
@@ -261,12 +246,49 @@
             this.materialButton2.UseVisualStyleBackColor = true;
             this.materialButton2.Click += new System.EventHandler(this.materialButton2_Click);
             // 
+            // materialTextBox1
+            // 
+            this.materialTextBox1.AnimateReadOnly = false;
+            this.materialTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.materialTextBox1.Depth = 0;
+            this.materialTextBox1.Font = new System.Drawing.Font("Roboto", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.materialTextBox1.LeadingIcon = null;
+            this.materialTextBox1.Location = new System.Drawing.Point(709, 31);
+            this.materialTextBox1.MaxLength = 50;
+            this.materialTextBox1.MouseState = MaterialSkin.MouseState.OUT;
+            this.materialTextBox1.Multiline = false;
+            this.materialTextBox1.Name = "materialTextBox1";
+            this.tableLayoutPanel1.SetRowSpan(this.materialTextBox1, 2);
+            this.materialTextBox1.Size = new System.Drawing.Size(298, 50);
+            this.materialTextBox1.TabIndex = 10;
+            this.materialTextBox1.Text = "";
+            this.toolTip1.SetToolTip(this.materialTextBox1, "Пример QA-1111 или 1111");
+            this.materialTextBox1.TrailingIcon = null;
+            // 
+            // materialCheckbox1
+            // 
+            this.materialCheckbox1.AutoSize = true;
+            this.materialCheckbox1.Checked = true;
+            this.materialCheckbox1.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.materialCheckbox1.Depth = 0;
+            this.materialCheckbox1.Location = new System.Drawing.Point(1017, 95);
+            this.materialCheckbox1.Margin = new System.Windows.Forms.Padding(0);
+            this.materialCheckbox1.MouseLocation = new System.Drawing.Point(-1, -1);
+            this.materialCheckbox1.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialCheckbox1.Name = "materialCheckbox1";
+            this.materialCheckbox1.ReadOnly = false;
+            this.materialCheckbox1.Ripple = true;
+            this.materialCheckbox1.Size = new System.Drawing.Size(112, 37);
+            this.materialCheckbox1.TabIndex = 13;
+            this.materialCheckbox1.Text = "Из задачи";
+            this.materialCheckbox1.UseVisualStyleBackColor = true;
+            // 
             // menuStrip
             // 
             this.menuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem2,
-            this.toolStripMenuItem1});
+            this.toolStripMenuItem1,
+            this.toolStripMenuItem2});
             this.menuStrip.Location = new System.Drawing.Point(4, 79);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Padding = new System.Windows.Forms.Padding(1, 0, 0, 0);
@@ -333,5 +355,6 @@
         private MaterialSkin.Controls.MaterialLabel materialLabel3;
         private MaterialSkin.Controls.MaterialButton materialButton2;
         private System.Windows.Forms.ToolTip toolTip1;
+        private MaterialSkin.Controls.MaterialCheckbox materialCheckbox1;
     }
 }

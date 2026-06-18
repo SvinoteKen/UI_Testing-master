@@ -1,12 +1,8 @@
-﻿using MaterialSkin.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace UI_Testing
 {
@@ -47,20 +43,8 @@ namespace UI_Testing
         private static readonly Regex IsoDateRegex =
             new Regex(@"""created""\s*:\s*""(\d{4}-\d{2}-\d{2})T", RegexOptions.Compiled);
 
-        private static readonly Regex ProductRegex =
-            new Regex(@"Требуется провести тестирование релиза\s+([^*\r\n]+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-        private static readonly Regex ScopeRegex =
-            new Regex(@"(?:Состав|Скоуп|Скоуп релиза|Состав релиза)\s*:\s*(.+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-        private static readonly Regex ZniRegex =
-            new Regex(@"(?:ZNI|ЗНИ)\s*:\s*(.+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // ==== Ключевые слова для URL ====
-        private const string RegressionKeywords = @"РЦ|Регрессионный цикл|Регрессионный ЦТ|Регресс";
         private const string FunctionalKeywords = @"ФЦ|Функциональный цикл|Функ\.цикл|Приемочные тестовые сценарии";
 
         // ==== Методы ====
@@ -75,19 +59,11 @@ namespace UI_Testing
         }
 
         /// <summary>
-        /// Извлекает список URL регрессионных циклов.
-        /// </summary>
-        public List<string> ExtractRegressionUrls()
-        {
-            return ExtractUrlsByKeywords(_json, RegressionKeywords);
-        }
-
-        /// <summary>
         /// Извлекает список URL функциональных циклов.
         /// </summary>
-        public List<string> ExtractCycleUrls()
+        public List<RegressionInfo> ExtractCycleUrls()
         {
-            return ExtractUrlsByKeywords(_json, FunctionalKeywords);
+            return ExtractUrlsByKeywords(_json);
         }
 
         /// <summary>
@@ -118,7 +94,7 @@ namespace UI_Testing
             // Scope (по URL)
             // =========================
             var scopeMatch = Regex.Match(description,
-                @"https://jira\.mos\.social/projects/[^\s\|\]]+",
+                @"https://jira\.mos\.social/(?:projects|browse/[^/]+/fixforversion)/[^\s\|\]]+",
                 RegexOptions.IgnoreCase);
 
             if (scopeMatch.Success)
@@ -137,6 +113,9 @@ namespace UI_Testing
             // =========================
             // ProductName из parent.summary
             // =========================
+
+            string productName = null;
+
             if (fields.TryGetProperty("parent", out var parent))
             {
                 var summary = parent
@@ -151,9 +130,28 @@ namespace UI_Testing
                         RegexOptions.IgnoreCase);
 
                     if (productMatch.Success)
-                        result.ProductName = productMatch.Groups[1].Value.Trim();
+                        productName = productMatch.Groups[1].Value.Trim();
                 }
             }
+
+            if (string.IsNullOrEmpty(productName))
+            {
+                // Поле summary текущей задачи
+                if (fields.TryGetProperty("summary", out var summaryElement))
+                {
+                    string ownSummary = summaryElement.GetString();
+                    if (!string.IsNullOrEmpty(ownSummary))
+                    {
+                        var productMatch = Regex.Match(ownSummary,
+                            @"Тестирование релиза\s+(.+)",
+                            RegexOptions.IgnoreCase);
+                        if (productMatch.Success)
+                            productName = productMatch.Groups[1].Value.Trim();
+                    }
+                }
+            }
+
+            result.ProductName = productName;
 
             return result;
         }
@@ -171,23 +169,54 @@ namespace UI_Testing
         
         // ==== Приватные помощники ====
 
-        private static List<string> ExtractUrlsByKeywords(string text, string keywordsPattern)
+        private static List<RegressionInfo> ExtractUrlsByKeywords(string text)
         {
-            var matches = Regex.Matches(
+            var result = new List<RegressionInfo>();
+
+            // ======== 1. Старый формат ========
+            var oldMatches = Regex.Matches(
                 text,
-                string.Format(@"\[(?:[^\]|]*({0})[^\]|]*)\|([^\]]+)\]", keywordsPattern),
+                @"\[((ФЦ|Функциональный цикл|Функ\.цикл|Приемочные тестовые сценарии)\s*([^\|\]]*))\|([^\]]+)\]",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-            var urls = new List<string>();
-            foreach (Match m in matches)
+            foreach (Match m in oldMatches)
             {
-                var url = m.Groups[2].Value.Trim();
-                if (!urls.Contains(url))
+                var name = m.Groups[3].Value.Trim();
+                var url = m.Groups[4].Value.Trim();
+
+                if (!string.IsNullOrWhiteSpace(url))
                 {
-                    urls.Add(url);
+                    result.Add(new RegressionInfo
+                    {
+                        Name = string.IsNullOrWhiteSpace(name) ? "" : name,
+                        Url = url
+                    });
                 }
             }
-            return urls;
+
+            // ======== 2. Новый формат ========
+            var matches = Regex.Matches(
+                text,
+                @"\|(?<type>ФЦ|Функциональный цикл|Функ\.цикл|Приемочные тестовые сценарии)\s*(?<name>[^-\[\|]*)\s*-\s*\[ссылка\|\[?(?<url>https?:\/\/[^\]\s]+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+            foreach (Match m in matches)
+            {
+                var name = m.Groups["name"].Value.Trim();
+                var url = m.Groups["url"].Value.Trim();
+
+                if (!string.IsNullOrWhiteSpace(url)
+                    && !result.Any(x => x.Url == url))
+                {
+                    result.Add(new RegressionInfo
+                    {
+                        Name = string.IsNullOrWhiteSpace(name) ? "" : name,
+                        Url = url
+                    });
+                }
+            }
+
+            return result;
         }
         public List<RegressionInfo> ExtractRegressionInfo()
         {
@@ -196,23 +225,87 @@ namespace UI_Testing
 
         private static List<RegressionInfo> ExtractRegressionWithNames(string text)
         {
-            var matches = Regex.Matches(
+            var result = new List<RegressionInfo>();
+
+            // ========== 1. Старый формат: [РЦ ...|url] ==========
+            var oldMatches = Regex.Matches(
                 text,
                 @"\[((РЦ|Регрессионный цикл|Регрессионный ЦТ|Регресс)\s*([^\|\]]*))\|([^\]]+)\]",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-            var result = new List<RegressionInfo>();
+            foreach (Match m in oldMatches)
+            {
+                var name = m.Groups[3].Value.Trim();
+                var url = m.Groups[4].Value.Trim();
+                if (!string.IsNullOrEmpty(url))
+                {
+                    result.Add(new RegressionInfo
+                    {
+                        Name = string.IsNullOrWhiteSpace(name) ? "" : name,
+                        Url = url
+                    });
+                }
+            }
+
+            // ========== 2. Новый формат: РЦ Название - [ссылка|url] ==========
+            // Ищем префикс, затем название (все символы до " - ["), затем "[ссылка|", затем url до "]".
+            var matches = Regex.Matches(
+    text,
+    @"\|(?<type>РЦ|Регрессионный цикл|Регрессионный ЦТ|Регресс)\s*(?<name>[^-\[\|]*)\s*-\s*\[ссылка\|\[?(?<url>https?:\/\/[^\]\s]+)",
+    RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
             foreach (Match m in matches)
             {
-                var name = m.Groups[3].Value.Trim(); // может быть пустой
-                var url = m.Groups[4].Value.Trim();
+                var name = m.Groups["name"].Value?.Trim();
+                var url = m.Groups["url"].Value?.Trim();
 
-                result.Add(new RegressionInfo
+                if (!string.IsNullOrWhiteSpace(url))
                 {
-                    Name = string.IsNullOrWhiteSpace(name) ? "" : name,
-                    Url = url
-                });
+                    result.Add(new RegressionInfo
+                    {
+                        Name = string.IsNullOrWhiteSpace(name) ? "" : name,
+                        Url = url
+                    });
+                }
+            }
+
+            var matchesAT = Regex.Matches(
+    text,
+    @"\|(?<type>Ручной прогон АТ)\s*(?<name>[^-\[\|]*)\s*-\s*\[ссылка\|\[?(?<url>https?:\/\/[^\]\s]+)",
+    RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+            foreach (Match m in matchesAT)
+            {
+                var name = m.Groups["name"].Value?.Trim();
+                var url = m.Groups["url"].Value?.Trim();
+
+                if (!string.IsNullOrWhiteSpace(url))
+                {
+                    result.Add(new RegressionInfo
+                    {
+                        Name = "Ручной прогон АТ",
+                        Url = url
+                    });
+                }
+            }
+
+            var oldMatchesAT = Regex.Matches(
+    text,
+    @"\[((Ручной прогон АТ)\s*([^\|\]]*))\|([^\]]+)\]",
+    RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+            foreach (Match m in oldMatchesAT)
+            {
+                var name = m.Groups[3].Value.Trim();
+                var url = m.Groups[4].Value.Trim();
+                if (!string.IsNullOrEmpty(url))
+                {
+                    result.Add(new RegressionInfo
+                    {
+                        Name = "Ручной прогон АТ",
+                        Url = url
+                    });
+                }
             }
 
             return result;

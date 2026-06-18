@@ -6,14 +6,11 @@ using System.Windows.Forms;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using MaterialSkin.Controls;
 using MaterialSkin;
-using UI_Testing;
 using Google.Apis.Auth.OAuth2;
 using System.Threading;
 using Google.Apis.Util.Store;
-using Google.Apis.Util;
 
 namespace UI_Testing
 {
@@ -30,15 +27,28 @@ namespace UI_Testing
             // Инициализация менеджера скинов
             materialSkinManager = MaterialSkinManager.Instance;
             materialSkinManager.AddFormToManage(this);
-            materialSkinManager.Theme = MaterialSkinManager.Themes.LIGHT; // или DARK
-            materialSkinManager.ColorScheme = new ColorScheme(
-                Primary.Blue600, Primary.Blue700,
-                Primary.Blue200, Accent.LightBlue200,
-                TextShade.WHITE
-            );
+            if (Properties.Settings.Default.Theme == "Dark")
+            {
+                materialSkinManager.Theme = MaterialSkinManager.Themes.DARK; // или DARK
+                materialSkinManager.ColorScheme = new ColorScheme(
+                    Primary.Blue700, Primary.Blue800,
+                    Primary.Blue300, Accent.LightBlue200,
+                    TextShade.WHITE
+                );
+            }
+            else 
+            {
+                materialSkinManager.Theme = MaterialSkinManager.Themes.LIGHT; // или DARK
+                materialSkinManager.ColorScheme = new ColorScheme(
+                    Primary.Blue600, Primary.Blue700,
+                    Primary.Blue200, Accent.LightBlue200,
+                    TextShade.WHITE
+                );
+            }
             // Дополнительно: установка размеров формы
             this.MaximizeBox = false;
             this.Sizable = false;
+            this.StartPosition = FormStartPosition.CenterScreen;
             CheckSavedCredentialsAsync();
         }
         public LoginForm(int i)
@@ -174,6 +184,7 @@ namespace UI_Testing
             //BeginInvoke((MethodInvoker)delegate { this.Close(); }); // <- Хак, чтобы корректно закрыть MaterialForm
             MainForm mainForm = new MainForm(Login, Password);
             this.Visible = false;
+            ThemeManager.ApplyThemeToForm(mainForm);
             mainForm.Show();
             
         }

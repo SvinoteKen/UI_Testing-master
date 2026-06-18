@@ -1,5 +1,4 @@
 ﻿using DocumentFormat.OpenXml.EMMA;
-using Google.Apis.Auth.OAuth2;
 using MaterialSkin.Controls;
 using Newtonsoft.Json.Linq;
 using System;
@@ -15,7 +14,6 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using static UI_Testing.ExtractInfoFromTask;
 
 namespace UI_Testing
@@ -106,6 +104,80 @@ namespace UI_Testing
 
             return results;
         }
+
+
+        public async Task<List<(string Name, int TotalCount, string URL)>> GetRegressionCycleStats(List<RegressionInfo> infos)
+        {
+            var results = new List<(string Name, int TotalCount, string URL)>();
+
+            foreach (var info in infos)
+            {
+                var baseUrl = info.Url;
+                var match = Regex.Match(baseUrl, @"[?#]query=(.+)", RegexOptions.IgnoreCase);
+                if (!match.Success)
+                {
+                    continue;
+                }
+                string queryPart = match.Groups[1].Value;
+                string zqlDecoded = Uri.UnescapeDataString(queryPart);
+
+                string cycleName = Regex.Match(zqlDecoded, @"cycleName\s*(=|in)\s*\(?""([^""]+)""\)?").Groups[2].Value;
+                string version = Regex.Match(zqlDecoded, @"fixVersion\s*=\s*""([^""]+)""").Groups[1].Value;
+
+                version = version == "Незапланированные" ? "Unscheduled" : version;
+                string project = Regex.Match(zqlDecoded, @"project\s*=\s*""([^""]+)""").Groups[1].Value;
+                string folderName = "";
+                var folderMatch = Regex.Match(zqlDecoded, @"folderName\s*in\s*\(\s*""([^""]+)""\s*\)", RegexOptions.IgnoreCase);
+                if (folderMatch.Success)
+                {
+                    folderName = folderMatch.Groups[1].Value;
+                }
+                if (string.IsNullOrWhiteSpace(cycleName) || string.IsNullOrWhiteSpace(project))
+                {
+                    continue;
+                }
+
+                int totalCount = await GetTestCountByStatus(cycleName, version, project, null, folderName);
+                results.Add((info.Name, totalCount, baseUrl));
+            }
+
+            return results;
+        }
+
+        public async Task<List<(string Name, int TotalCount, string URL)>> GetFunctionalCycleStats(List<RegressionInfo> infos)
+        {
+            var results = new List<(string Name, int TotalCount, string URL)>();
+
+            foreach (var info in infos)
+            {
+                var baseUrl = info.Url;
+                int index = baseUrl.IndexOf("#?query=");
+                if (index == -1) continue;
+
+                string queryPart = baseUrl.Substring(index + "#?query=".Length);
+                string zqlDecoded = Uri.UnescapeDataString(queryPart);
+
+                string cycleName = Regex.Match(zqlDecoded, @"cycleName\s*(=|in)\s*\(?""([^""]+)""\)?").Groups[2].Value;
+                string version = Regex.Match(zqlDecoded, @"fixVersion\s*=\s*""([^""]+)""").Groups[1].Value;
+                version = version == "Незапланированные" ? "Unscheduled" : version;
+                string project = Regex.Match(zqlDecoded, @"project\s*=\s*""([^""]+)""").Groups[1].Value;
+                string folderName = "";
+                var folderMatch = Regex.Match(zqlDecoded, @"folderName\s*in\s*\(\s*""([^""]+)""\s*\)", RegexOptions.IgnoreCase);
+                if (folderMatch.Success)
+                {
+                    folderName = folderMatch.Groups[1].Value;
+                }
+
+                if (string.IsNullOrWhiteSpace(cycleName) || string.IsNullOrWhiteSpace(version) || string.IsNullOrWhiteSpace(project))
+                    continue;
+
+                int totalCount = await GetTestCountByStatus(cycleName, version, project, null, folderName);
+                results.Add((info.Name, totalCount, baseUrl));
+            }
+
+            return results;
+        }
+
         public async Task<string> GetAoToken()
         {
 
@@ -138,7 +210,10 @@ namespace UI_Testing
             builder.Append($"?zqlQuery=cycleName=\"{Uri.EscapeDataString(cycleName)}\"");
             if (!string.IsNullOrWhiteSpace(folderName))
                 builder.Append($"+AND+folderName=\"{Uri.EscapeDataString(folderName)}\"");
-            builder.Append($"+AND+fixVersion=\"{Uri.EscapeDataString(version)}\"");
+            if (version != "")
+            {
+                builder.Append($"+AND+fixVersion=\"{Uri.EscapeDataString(version)}\"");
+            }
             builder.Append($"+AND+project=\"{Uri.EscapeDataString(project)}\"");
 
             if (!string.IsNullOrEmpty(status))
@@ -186,7 +261,7 @@ namespace UI_Testing
             builder.Append($"+AND+project=\"{Uri.EscapeDataString(project)}\"");
 
             // 🔥 ВОТ ОНО
-            builder.Append($"+AND+executedBy+%3D+Atl_Mesh_Zephyr");
+            builder.Append($"+AND+executedBy%20IN%20(Atl_Mesh_Zephyr%2CJenkins)");
 
             var request = new HttpRequestMessage(HttpMethod.Get, baseUrl + builder.ToString());
             request.Headers.Add("ao-7deabf", token);
@@ -465,6 +540,60 @@ namespace UI_Testing
             }
         }
 
+        public async Task<string> IssuesJiraReportAsync(string jql)
+        {
+            // Извлекаем JQL из URL (можно просто передавать jql отдельно)
+            // Для простоты будем использовать тот же url, но заменим базовый путь на REST API.
+            string foundUrl = "https://jira.mos.social/issues/?jql=" + Uri.EscapeDataString(jql);
+            
+            var restUrl = $"https://jira.mos.social/rest/api/2/search?jql={Uri.EscapeDataString(jql)}&maxResults=0";
+
+            var response = await httpClient.GetAsync(restUrl).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode) 
+            {
+                return foundUrl; 
+            }
+
+            string json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var obj = JObject.Parse(json);
+            int total = obj["total"]?.Value<int>() ?? 0;
+            return total > 0 ? foundUrl : "Дефектов не обнаружено";
+        }
+        private string BuildCurlCommand(string url, HttpClient client)
+        {
+            var sb = new StringBuilder();
+            sb.Append("curl ");
+
+            // Экранируем URL, если в нём есть спецсимволы
+            sb.Append($"\"{url}\" ");
+
+            // Добавляем заголовки из DefaultRequestHeaders
+            foreach (var header in client.DefaultRequestHeaders)
+            {
+                string headerValue = string.Join(", ", header.Value);
+                sb.Append($"-H \"{header.Key}: {headerValue}\" ");
+            }
+
+            // Если используется CookieContainer (обычно для Jira), добавляем куки
+            var handler = client.GetType().GetProperty("Handler")?.GetValue(client) as HttpClientHandler;
+            if (handler?.CookieContainer != null)
+            {
+                var cookies = handler.CookieContainer.GetCookies(new Uri(url));
+                if (cookies.Count > 0)
+                {
+                    string cookieString = string.Join("; ", cookies.Cast<Cookie>().Select(c => $"{c.Name}={c.Value}"));
+                    sb.Append($"-H \"Cookie: {cookieString}\" ");
+                }
+            }
+
+            // Если есть другие стандартные заголовки, которые часто нужны для Jira
+            // (их можно добавить вручную, если они не попали в DefaultRequestHeaders)
+            sb.Append($"-H \"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\" ");
+            sb.Append($"-H \"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36\" ");
+            // Добавьте другие нужные заголовки, если требуется
+
+            return sb.ToString();
+        }
         public async Task<string> DownloadJiraReportAsync(DateTime from, DateTime to,string jql)
         {
 

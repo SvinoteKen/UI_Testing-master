@@ -34,7 +34,6 @@ namespace UI_Testing
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
-            this.оценкаToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.дляТМToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.textBox1 = new System.Windows.Forms.TextBox();
@@ -46,21 +45,19 @@ namespace UI_Testing
             this.textBoxVersion = new MaterialSkin.Controls.MaterialTextBox();
             this.materialLabel2 = new MaterialSkin.Controls.MaterialLabel();
             this.dataGridViewPreview = new System.Windows.Forms.DataGridView();
-            this.materialButton1 = new MaterialSkin.Controls.MaterialButton();
-            this.materialButton2 = new MaterialSkin.Controls.MaterialButton();
-            this.blocksTC = new MaterialSkin.Controls.MaterialCheckbox();
-            this.materialCheckbox = new MaterialSkin.Controls.MaterialCheckbox();
-            this.checkBoxIteration = new MaterialSkin.Controls.MaterialCheckbox();
-            this.materialCheckbox1 = new MaterialSkin.Controls.MaterialCheckbox();
             this.checkBoxPreview = new MaterialSkin.Controls.MaterialCheckbox();
             this.checkBoxNoStyle = new MaterialSkin.Controls.MaterialCheckbox();
-            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.materialLabel4 = new MaterialSkin.Controls.MaterialLabel();
+            this.checkBoxIteration = new MaterialSkin.Controls.MaterialCheckbox();
+            this.materialCheckbox1 = new MaterialSkin.Controls.MaterialCheckbox();
+            this.materialCheckbox = new MaterialSkin.Controls.MaterialCheckbox();
+            this.blocksTC = new MaterialSkin.Controls.MaterialCheckbox();
+            this.materialButton2 = new MaterialSkin.Controls.MaterialButton();
+            this.materialButton1 = new MaterialSkin.Controls.MaterialButton();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.themeSwitch = new MaterialSkin.Controls.MaterialSwitch();
             this.menuStrip.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewPreview)).BeginInit();
-            this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip
@@ -71,21 +68,21 @@ namespace UI_Testing
             this.toolStripMenuItem2,
             this.toolStripMenuItem1,
             this.toolStripMenuItem3,
-            this.оценкаToolStripMenuItem,
             this.toolStripMenuItem4,
             this.дляТМToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(4, 79);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Padding = new System.Windows.Forms.Padding(5, 2, 0, 2);
-            this.menuStrip.Size = new System.Drawing.Size(1193, 36);
+            this.menuStrip.Size = new System.Drawing.Size(1193, 29);
             this.menuStrip.TabIndex = 10;
             this.menuStrip.Text = "menuStrip";
             // 
             // toolStripMenuItem5
             // 
+            this.toolStripMenuItem5.BackColor = System.Drawing.SystemColors.Control;
             this.toolStripMenuItem5.Font = new System.Drawing.Font("Segoe UI", 12F);
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(52, 32);
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(42, 25);
             this.toolStripMenuItem5.Text = "ЯД";
             this.toolStripMenuItem5.Click += new System.EventHandler(this.toolStripMenuItem5_Click);
             // 
@@ -93,7 +90,7 @@ namespace UI_Testing
             // 
             this.toolStripMenuItem2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(78, 32);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(65, 25);
             this.toolStripMenuItem2.Text = "Отчет";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
             // 
@@ -101,7 +98,7 @@ namespace UI_Testing
             // 
             this.toolStripMenuItem1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(95, 32);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(77, 25);
             this.toolStripMenuItem1.Text = "ГД (old)";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
@@ -109,23 +106,16 @@ namespace UI_Testing
             // 
             this.toolStripMenuItem3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(83, 32);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(66, 25);
             this.toolStripMenuItem3.Text = "Поиск";
+            this.toolStripMenuItem3.Visible = false;
             this.toolStripMenuItem3.Click += new System.EventHandler(this.toolStripMenuItem3_Click);
-            // 
-            // оценкаToolStripMenuItem
-            // 
-            this.оценкаToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 12F);
-            this.оценкаToolStripMenuItem.Name = "оценкаToolStripMenuItem";
-            this.оценкаToolStripMenuItem.Size = new System.Drawing.Size(95, 32);
-            this.оценкаToolStripMenuItem.Text = "Оценка";
-            this.оценкаToolStripMenuItem.Click += new System.EventHandler(this.оценкаToolStripMenuItem_Click);
             // 
             // toolStripMenuItem4
             // 
             this.toolStripMenuItem4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(151, 32);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(120, 25);
             this.toolStripMenuItem4.Text = "Верификация";
             this.toolStripMenuItem4.Visible = false;
             this.toolStripMenuItem4.Click += new System.EventHandler(this.toolStripMenuItem4_Click);
@@ -134,7 +124,7 @@ namespace UI_Testing
             // 
             this.дляТМToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 12F);
             this.дляТМToolStripMenuItem.Name = "дляТМToolStripMenuItem";
-            this.дляТМToolStripMenuItem.Size = new System.Drawing.Size(94, 32);
+            this.дляТМToolStripMenuItem.Size = new System.Drawing.Size(75, 25);
             this.дляТМToolStripMenuItem.Text = "Для ТМ";
             this.дляТМToolStripMenuItem.Click += new System.EventHandler(this.дляТМToolStripMenuItem_Click);
             // 
@@ -162,7 +152,7 @@ namespace UI_Testing
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.83532F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 49.16468F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 149F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 198F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 208F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Controls.Add(this.materialLabel1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.textBoxSheetUrl, 0, 1);
@@ -201,10 +191,9 @@ namespace UI_Testing
             this.materialLabel1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.materialLabel1.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialLabel1.Name = "materialLabel1";
-            this.materialLabel1.Size = new System.Drawing.Size(105, 19);
+            this.materialLabel1.Size = new System.Drawing.Size(176, 19);
             this.materialLabel1.TabIndex = 11;
-            this.materialLabel1.Text = "Ссылка на ГД";
-            this.materialLabel1.Visible = false;
+            this.materialLabel1.Text = "cURL созданного листа";
             // 
             // textBoxSheetUrl
             // 
@@ -217,15 +206,15 @@ namespace UI_Testing
             this.textBoxSheetUrl.LeadingIcon = null;
             this.textBoxSheetUrl.Location = new System.Drawing.Point(4, 64);
             this.textBoxSheetUrl.Margin = new System.Windows.Forms.Padding(4);
-            this.textBoxSheetUrl.MaxLength = 500;
+            this.textBoxSheetUrl.MaxLength = 20000;
             this.textBoxSheetUrl.MouseState = MaterialSkin.MouseState.OUT;
             this.textBoxSheetUrl.Multiline = false;
             this.textBoxSheetUrl.Name = "textBoxSheetUrl";
-            this.textBoxSheetUrl.Size = new System.Drawing.Size(420, 50);
+            this.textBoxSheetUrl.Size = new System.Drawing.Size(414, 50);
             this.textBoxSheetUrl.TabIndex = 0;
             this.textBoxSheetUrl.Text = "";
             this.textBoxSheetUrl.TrailingIcon = null;
-            this.textBoxSheetUrl.Visible = false;
+            this.textBoxSheetUrl.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxSheetUrl_KeyDown);
             // 
             // materialLabel3
             // 
@@ -238,7 +227,7 @@ namespace UI_Testing
             this.materialLabel3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.materialLabel3.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialLabel3.Name = "materialLabel3";
-            this.materialLabel3.Size = new System.Drawing.Size(420, 19);
+            this.materialLabel3.Size = new System.Drawing.Size(414, 19);
             this.materialLabel3.TabIndex = 13;
             this.materialLabel3.Text = "Скоуп";
             // 
@@ -251,13 +240,13 @@ namespace UI_Testing
             this.textBoxStyleSheetUrl.Depth = 0;
             this.textBoxStyleSheetUrl.Font = new System.Drawing.Font("Roboto", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textBoxStyleSheetUrl.LeadingIcon = null;
-            this.textBoxStyleSheetUrl.Location = new System.Drawing.Point(432, 64);
+            this.textBoxStyleSheetUrl.Location = new System.Drawing.Point(426, 64);
             this.textBoxStyleSheetUrl.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxStyleSheetUrl.MaxLength = 200;
             this.textBoxStyleSheetUrl.MouseState = MaterialSkin.MouseState.OUT;
             this.textBoxStyleSheetUrl.Multiline = false;
             this.textBoxStyleSheetUrl.Name = "textBoxStyleSheetUrl";
-            this.textBoxStyleSheetUrl.Size = new System.Drawing.Size(405, 50);
+            this.textBoxStyleSheetUrl.Size = new System.Drawing.Size(401, 50);
             this.textBoxStyleSheetUrl.TabIndex = 1;
             this.textBoxStyleSheetUrl.Text = "";
             this.textBoxStyleSheetUrl.TrailingIcon = null;
@@ -278,7 +267,7 @@ namespace UI_Testing
             this.textBoxVersion.MouseState = MaterialSkin.MouseState.OUT;
             this.textBoxVersion.Multiline = false;
             this.textBoxVersion.Name = "textBoxVersion";
-            this.textBoxVersion.Size = new System.Drawing.Size(420, 50);
+            this.textBoxVersion.Size = new System.Drawing.Size(414, 50);
             this.textBoxVersion.TabIndex = 2;
             this.textBoxVersion.Text = "";
             this.textBoxVersion.TrailingIcon = null;
@@ -289,7 +278,7 @@ namespace UI_Testing
             this.materialLabel2.AutoSize = true;
             this.materialLabel2.Depth = 0;
             this.materialLabel2.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.materialLabel2.Location = new System.Drawing.Point(432, 41);
+            this.materialLabel2.Location = new System.Drawing.Point(426, 41);
             this.materialLabel2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.materialLabel2.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialLabel2.Name = "materialLabel2";
@@ -312,87 +301,51 @@ namespace UI_Testing
             this.dataGridViewPreview.RowHeadersWidth = 51;
             this.dataGridViewPreview.Size = new System.Drawing.Size(1181, 413);
             this.dataGridViewPreview.TabIndex = 8;
+            this.dataGridViewPreview.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridViewPreview_KeyDown);
             // 
-            // materialButton1
+            // checkBoxPreview
             // 
-            this.materialButton1.AutoSize = false;
-            this.materialButton1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.materialButton1.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
-            this.materialButton1.Depth = 0;
-            this.materialButton1.HighEmphasis = true;
-            this.materialButton1.Icon = null;
-            this.materialButton1.Location = new System.Drawing.Point(995, 7);
-            this.materialButton1.Margin = new System.Windows.Forms.Padding(5, 7, 5, 7);
-            this.materialButton1.MouseState = MaterialSkin.MouseState.HOVER;
-            this.materialButton1.Name = "materialButton1";
-            this.materialButton1.NoAccentTextColor = System.Drawing.Color.Empty;
-            this.materialButton1.Size = new System.Drawing.Size(185, 44);
-            this.materialButton1.TabIndex = 7;
-            this.materialButton1.Text = "Предпросмотр";
-            this.materialButton1.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
-            this.materialButton1.UseAccentColor = false;
-            this.materialButton1.UseVisualStyleBackColor = true;
-            this.materialButton1.Click += new System.EventHandler(this.materialButton1_Click);
+            this.checkBoxPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBoxPreview.AutoSize = true;
+            this.checkBoxPreview.Checked = true;
+            this.checkBoxPreview.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxPreview.Depth = 0;
+            this.checkBoxPreview.Location = new System.Drawing.Point(685, 120);
+            this.checkBoxPreview.Margin = new System.Windows.Forms.Padding(0);
+            this.checkBoxPreview.MouseLocation = new System.Drawing.Point(-1, -1);
+            this.checkBoxPreview.MouseState = MaterialSkin.MouseState.HOVER;
+            this.checkBoxPreview.Name = "checkBoxPreview";
+            this.checkBoxPreview.ReadOnly = false;
+            this.checkBoxPreview.Ripple = true;
+            this.checkBoxPreview.Size = new System.Drawing.Size(146, 37);
+            this.checkBoxPreview.TabIndex = 5;
+            this.checkBoxPreview.Text = "Предпросмотр";
+            this.checkBoxPreview.UseVisualStyleBackColor = true;
+            this.checkBoxPreview.CheckedChanged += new System.EventHandler(this.checkBoxPreview_CheckedChanged_1);
             // 
-            // materialButton2
+            // checkBoxNoStyle
             // 
-            this.materialButton2.AutoSize = false;
-            this.materialButton2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.materialButton2.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
-            this.materialButton2.Depth = 0;
-            this.materialButton2.HighEmphasis = true;
-            this.materialButton2.Icon = null;
-            this.materialButton2.Location = new System.Drawing.Point(995, 67);
-            this.materialButton2.Margin = new System.Windows.Forms.Padding(5, 7, 5, 7);
-            this.materialButton2.MouseState = MaterialSkin.MouseState.HOVER;
-            this.materialButton2.Name = "materialButton2";
-            this.materialButton2.NoAccentTextColor = System.Drawing.Color.Empty;
-            this.materialButton2.Size = new System.Drawing.Size(185, 41);
-            this.materialButton2.TabIndex = 15;
-            this.materialButton2.Text = "Выгрузка ЯД";
-            this.materialButton2.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
-            this.materialButton2.UseAccentColor = false;
-            this.materialButton2.UseVisualStyleBackColor = true;
-            this.materialButton2.Click += new System.EventHandler(this.materialButton2_Click);
-            // 
-            // blocksTC
-            // 
-            this.blocksTC.AutoSize = true;
-            this.blocksTC.Depth = 0;
-            this.blocksTC.Location = new System.Drawing.Point(990, 120);
-            this.blocksTC.Margin = new System.Windows.Forms.Padding(0);
-            this.blocksTC.MouseLocation = new System.Drawing.Point(-1, -1);
-            this.blocksTC.MouseState = MaterialSkin.MouseState.HOVER;
-            this.blocksTC.Name = "blocksTC";
-            this.blocksTC.ReadOnly = false;
-            this.blocksTC.Ripple = true;
-            this.blocksTC.Size = new System.Drawing.Size(105, 37);
-            this.blocksTC.TabIndex = 17;
-            this.blocksTC.Text = "blocks ТК";
-            this.blocksTC.UseVisualStyleBackColor = true;
-            // 
-            // materialCheckbox
-            // 
-            this.materialCheckbox.AutoSize = true;
-            this.materialCheckbox.Depth = 0;
-            this.materialCheckbox.Location = new System.Drawing.Point(990, 175);
-            this.materialCheckbox.Margin = new System.Windows.Forms.Padding(0);
-            this.materialCheckbox.MouseLocation = new System.Drawing.Point(-1, -1);
-            this.materialCheckbox.MouseState = MaterialSkin.MouseState.HOVER;
-            this.materialCheckbox.Name = "materialCheckbox";
-            this.materialCheckbox.ReadOnly = false;
-            this.materialCheckbox.Ripple = true;
-            this.materialCheckbox.Size = new System.Drawing.Size(148, 37);
-            this.materialCheckbox.TabIndex = 9;
-            this.materialCheckbox.Text = "С приоритетом";
-            this.materialCheckbox.UseVisualStyleBackColor = true;
-            this.materialCheckbox.Visible = false;
+            this.checkBoxNoStyle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBoxNoStyle.AutoSize = true;
+            this.checkBoxNoStyle.Depth = 0;
+            this.checkBoxNoStyle.Location = new System.Drawing.Point(725, 175);
+            this.checkBoxNoStyle.Margin = new System.Windows.Forms.Padding(0);
+            this.checkBoxNoStyle.MouseLocation = new System.Drawing.Point(-1, -1);
+            this.checkBoxNoStyle.MouseState = MaterialSkin.MouseState.HOVER;
+            this.checkBoxNoStyle.Name = "checkBoxNoStyle";
+            this.checkBoxNoStyle.ReadOnly = false;
+            this.checkBoxNoStyle.Ripple = true;
+            this.checkBoxNoStyle.Size = new System.Drawing.Size(106, 37);
+            this.checkBoxNoStyle.TabIndex = 3;
+            this.checkBoxNoStyle.Text = "Из файла";
+            this.checkBoxNoStyle.UseVisualStyleBackColor = true;
+            this.checkBoxNoStyle.CheckedChanged += new System.EventHandler(this.checkBoxNoStyle_CheckedChanged);
             // 
             // checkBoxIteration
             // 
             this.checkBoxIteration.AutoSize = true;
             this.checkBoxIteration.Depth = 0;
-            this.checkBoxIteration.Location = new System.Drawing.Point(841, 120);
+            this.checkBoxIteration.Location = new System.Drawing.Point(831, 120);
             this.checkBoxIteration.Margin = new System.Windows.Forms.Padding(0);
             this.checkBoxIteration.MouseLocation = new System.Drawing.Point(-1, -1);
             this.checkBoxIteration.MouseState = MaterialSkin.MouseState.HOVER;
@@ -408,7 +361,7 @@ namespace UI_Testing
             // 
             this.materialCheckbox1.AutoSize = true;
             this.materialCheckbox1.Depth = 0;
-            this.materialCheckbox1.Location = new System.Drawing.Point(841, 175);
+            this.materialCheckbox1.Location = new System.Drawing.Point(831, 175);
             this.materialCheckbox1.Margin = new System.Windows.Forms.Padding(0);
             this.materialCheckbox1.MouseLocation = new System.Drawing.Point(-1, -1);
             this.materialCheckbox1.MouseState = MaterialSkin.MouseState.HOVER;
@@ -419,73 +372,83 @@ namespace UI_Testing
             this.materialCheckbox1.TabIndex = 16;
             this.materialCheckbox1.Text = "из цикла";
             this.materialCheckbox1.UseVisualStyleBackColor = true;
+            this.materialCheckbox1.CheckedChanged += new System.EventHandler(this.materialCheckbox1_CheckedChanged);
             // 
-            // checkBoxPreview
+            // materialCheckbox
             // 
-            this.checkBoxPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.checkBoxPreview.AutoSize = true;
-            this.checkBoxPreview.Checked = true;
-            this.checkBoxPreview.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxPreview.Depth = 0;
-            this.checkBoxPreview.Location = new System.Drawing.Point(695, 120);
-            this.checkBoxPreview.Margin = new System.Windows.Forms.Padding(0);
-            this.checkBoxPreview.MouseLocation = new System.Drawing.Point(-1, -1);
-            this.checkBoxPreview.MouseState = MaterialSkin.MouseState.HOVER;
-            this.checkBoxPreview.Name = "checkBoxPreview";
-            this.checkBoxPreview.ReadOnly = false;
-            this.checkBoxPreview.Ripple = true;
-            this.checkBoxPreview.Size = new System.Drawing.Size(146, 37);
-            this.checkBoxPreview.TabIndex = 5;
-            this.checkBoxPreview.Text = "Предпросмотр";
-            this.checkBoxPreview.UseVisualStyleBackColor = true;
+            this.materialCheckbox.AutoSize = true;
+            this.materialCheckbox.Depth = 0;
+            this.materialCheckbox.Location = new System.Drawing.Point(980, 175);
+            this.materialCheckbox.Margin = new System.Windows.Forms.Padding(0);
+            this.materialCheckbox.MouseLocation = new System.Drawing.Point(-1, -1);
+            this.materialCheckbox.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialCheckbox.Name = "materialCheckbox";
+            this.materialCheckbox.ReadOnly = false;
+            this.materialCheckbox.Ripple = true;
+            this.materialCheckbox.Size = new System.Drawing.Size(148, 37);
+            this.materialCheckbox.TabIndex = 9;
+            this.materialCheckbox.Text = "С приоритетом";
+            this.materialCheckbox.UseVisualStyleBackColor = true;
+            this.materialCheckbox.Visible = false;
+            this.materialCheckbox.CheckedChanged += new System.EventHandler(this.materialCheckbox_CheckedChanged);
             // 
-            // checkBoxNoStyle
+            // blocksTC
             // 
-            this.checkBoxNoStyle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.checkBoxNoStyle.AutoSize = true;
-            this.checkBoxNoStyle.Depth = 0;
-            this.checkBoxNoStyle.Location = new System.Drawing.Point(733, 175);
-            this.checkBoxNoStyle.Margin = new System.Windows.Forms.Padding(0);
-            this.checkBoxNoStyle.MouseLocation = new System.Drawing.Point(-1, -1);
-            this.checkBoxNoStyle.MouseState = MaterialSkin.MouseState.HOVER;
-            this.checkBoxNoStyle.Name = "checkBoxNoStyle";
-            this.checkBoxNoStyle.ReadOnly = false;
-            this.checkBoxNoStyle.Ripple = true;
-            this.checkBoxNoStyle.Size = new System.Drawing.Size(108, 37);
-            this.checkBoxNoStyle.TabIndex = 3;
-            this.checkBoxNoStyle.Text = "Без стиля";
-            this.checkBoxNoStyle.UseVisualStyleBackColor = true;
-            this.checkBoxNoStyle.Visible = false;
+            this.blocksTC.AutoSize = true;
+            this.blocksTC.Depth = 0;
+            this.blocksTC.Location = new System.Drawing.Point(980, 120);
+            this.blocksTC.Margin = new System.Windows.Forms.Padding(0);
+            this.blocksTC.MouseLocation = new System.Drawing.Point(-1, -1);
+            this.blocksTC.MouseState = MaterialSkin.MouseState.HOVER;
+            this.blocksTC.Name = "blocksTC";
+            this.blocksTC.ReadOnly = false;
+            this.blocksTC.Ripple = true;
+            this.blocksTC.Size = new System.Drawing.Size(105, 37);
+            this.blocksTC.TabIndex = 17;
+            this.blocksTC.Text = "blocks ТК";
+            this.blocksTC.UseVisualStyleBackColor = true;
             // 
-            // tableLayoutPanel2
+            // materialButton2
             // 
-            this.tableLayoutPanel2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel2.ColumnCount = 1;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.Controls.Add(this.materialLabel4, 0, 0);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(7, 118);
-            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 1;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(1190, 657);
-            this.tableLayoutPanel2.TabIndex = 21;
-            this.tableLayoutPanel2.Visible = false;
+            this.materialButton2.AutoSize = false;
+            this.materialButton2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.materialButton2.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
+            this.materialButton2.Depth = 0;
+            this.materialButton2.HighEmphasis = true;
+            this.materialButton2.Icon = null;
+            this.materialButton2.Location = new System.Drawing.Point(985, 67);
+            this.materialButton2.Margin = new System.Windows.Forms.Padding(5, 7, 5, 7);
+            this.materialButton2.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialButton2.Name = "materialButton2";
+            this.materialButton2.NoAccentTextColor = System.Drawing.Color.Empty;
+            this.materialButton2.Size = new System.Drawing.Size(185, 41);
+            this.materialButton2.TabIndex = 15;
+            this.materialButton2.Text = "Выгрузка ЯД";
+            this.materialButton2.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
+            this.materialButton2.UseAccentColor = false;
+            this.materialButton2.UseVisualStyleBackColor = true;
+            this.materialButton2.Click += new System.EventHandler(this.materialButton2_Click);
             // 
-            // materialLabel4
+            // materialButton1
             // 
-            this.materialLabel4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.materialLabel4.AutoSize = true;
-            this.materialLabel4.Depth = 0;
-            this.materialLabel4.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.materialLabel4.Location = new System.Drawing.Point(3, 319);
-            this.materialLabel4.MouseState = MaterialSkin.MouseState.HOVER;
-            this.materialLabel4.Name = "materialLabel4";
-            this.materialLabel4.Size = new System.Drawing.Size(1184, 19);
-            this.materialLabel4.TabIndex = 14;
-            this.materialLabel4.Text = "Спасибо что поинтересовались, функционал \"Поиск\" еще не разработан :(";
-            this.materialLabel4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.materialButton1.AutoSize = false;
+            this.materialButton1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.materialButton1.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
+            this.materialButton1.Depth = 0;
+            this.materialButton1.HighEmphasis = true;
+            this.materialButton1.Icon = null;
+            this.materialButton1.Location = new System.Drawing.Point(985, 7);
+            this.materialButton1.Margin = new System.Windows.Forms.Padding(5, 7, 5, 7);
+            this.materialButton1.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialButton1.Name = "materialButton1";
+            this.materialButton1.NoAccentTextColor = System.Drawing.Color.Empty;
+            this.materialButton1.Size = new System.Drawing.Size(185, 44);
+            this.materialButton1.TabIndex = 7;
+            this.materialButton1.Text = "Предпросмотр";
+            this.materialButton1.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
+            this.materialButton1.UseAccentColor = false;
+            this.materialButton1.UseVisualStyleBackColor = true;
+            this.materialButton1.Click += new System.EventHandler(this.materialButton1_Click);
             // 
             // tableLayoutPanel3
             // 
@@ -501,13 +464,30 @@ namespace UI_Testing
             this.tableLayoutPanel3.Size = new System.Drawing.Size(1186, 484);
             this.tableLayoutPanel3.TabIndex = 25;
             // 
+            // themeSwitch
+            // 
+            this.themeSwitch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.themeSwitch.BackColor = System.Drawing.SystemColors.Control;
+            this.themeSwitch.Depth = 0;
+            this.themeSwitch.Location = new System.Drawing.Point(1017, 79);
+            this.themeSwitch.Margin = new System.Windows.Forms.Padding(0);
+            this.themeSwitch.MouseLocation = new System.Drawing.Point(-1, -1);
+            this.themeSwitch.MouseState = MaterialSkin.MouseState.HOVER;
+            this.themeSwitch.Name = "themeSwitch";
+            this.themeSwitch.Ripple = true;
+            this.themeSwitch.Size = new System.Drawing.Size(180, 35);
+            this.themeSwitch.TabIndex = 27;
+            this.themeSwitch.Text = "DarkMode";
+            this.themeSwitch.UseVisualStyleBackColor = false;
+            this.themeSwitch.CheckedChanged += new System.EventHandler(this.themeSwitch_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1201, 782);
+            this.Controls.Add(this.themeSwitch);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.tableLayoutPanel3);
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
@@ -517,13 +497,12 @@ namespace UI_Testing
             this.Padding = new System.Windows.Forms.Padding(4, 79, 4, 4);
             this.Text = "ЯД";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewPreview)).EndInit();
-            this.tableLayoutPanel2.ResumeLayout(false);
-            this.tableLayoutPanel2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -537,9 +516,7 @@ namespace UI_Testing
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
-        private System.Windows.Forms.ToolStripMenuItem оценкаToolStripMenuItem;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private MaterialSkin.Controls.MaterialLabel materialLabel1;
         private MaterialSkin.Controls.MaterialTextBox textBoxSheetUrl;
@@ -550,7 +527,6 @@ namespace UI_Testing
         private System.Windows.Forms.DataGridView dataGridViewPreview;
         private MaterialSkin.Controls.MaterialButton materialButton1;
         private MaterialSkin.Controls.MaterialButton materialButton2;
-        private MaterialSkin.Controls.MaterialLabel materialLabel4;
         private MaterialSkin.Controls.MaterialCheckbox blocksTC;
         private MaterialSkin.Controls.MaterialCheckbox materialCheckbox;
         private MaterialSkin.Controls.MaterialCheckbox checkBoxIteration;
@@ -558,5 +534,6 @@ namespace UI_Testing
         private MaterialSkin.Controls.MaterialCheckbox checkBoxPreview;
         private MaterialSkin.Controls.MaterialCheckbox checkBoxNoStyle;
         private System.Windows.Forms.ToolStripMenuItem дляТМToolStripMenuItem;
+        private MaterialSkin.Controls.MaterialSwitch themeSwitch;
     }
 }

@@ -1,6 +1,4 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml.Vml.Spreadsheet;
-using MaterialSkin;
+﻿using MaterialSkin;
 using MaterialSkin.Controls;
 using System;
 using System.Collections.Generic;
@@ -11,7 +9,6 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.UI;
 using System.Windows.Forms;
@@ -35,19 +32,39 @@ namespace UI_Testing
             // Инициализация менеджера скинов
             materialSkinManager = MaterialSkinManager.Instance;
             materialSkinManager.AddFormToManage(this);
-            materialSkinManager.Theme = MaterialSkinManager.Themes.LIGHT; // или DARK
-            materialSkinManager.ColorScheme = new ColorScheme(
-                Primary.Blue600, Primary.Blue700,
-                Primary.Blue200, Accent.LightBlue200,
-                TextShade.WHITE
-            );
+
             login = _login;
             password = _password;
             toolStripMenuItem5.Enabled = false;
-            materialLabel4.Visible = false;
             tableLayoutPanel1.Visible = true;
-            tableLayoutPanel2.Visible = false;
             tableLayoutPanel3.Visible = false;
+            this.StartPosition = FormStartPosition.CenterScreen;
+            List<string> headers = new List<string>
+                {
+                    "№", "Тип", "ТК", "Название", "Кол-во тестов",
+                    "Кол-во шагов", "Ревью ТК","Статус ТК", "Тестировщик", "Комментарий", "Статус задачи"
+                };
+            foreach (var header in headers)
+            {
+                var column = new DataGridViewTextBoxColumn
+                {
+                    HeaderText = header,
+                    Name = header,
+                    ReadOnly = false
+                };
+                dataGridViewPreview.Columns.Add(column);
+            }
+            dataGridViewPreview.AllowUserToAddRows = true;
+            dataGridViewPreview.AllowUserToDeleteRows = true;
+            dataGridViewPreview.AllowUserToOrderColumns = false;
+            dataGridViewPreview.EditMode = DataGridViewEditMode.EditOnKeystrokeOrF2;
+            dataGridViewPreview.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dataGridViewPreview.MultiSelect = true;
+            dataGridViewPreview.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            foreach (DataGridViewColumn column in dataGridViewPreview.Columns)
+            {
+                column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
         }
         public void SetCredentials(string login, string password)
         {
@@ -148,30 +165,39 @@ namespace UI_Testing
 
                     // 6. Проверяем ссылку на Google Sheet
                     string sheetUrl = header.YandexDiskUrl;
-                    if (string.IsNullOrEmpty(gdUrl))
+
+                    SheetStats stats = new SheetStats();
+                    if (checkBoxNoStyle.Checked)
                     {
-                        MaterialMessageBox.Show(this, "Введите URL Google таблицы.");
-                        return;
+                        if (string.IsNullOrEmpty(gdUrl))
+                        {
+                            MaterialMessageBox.Show(this, "Введите URL Google таблицы.");
+                            return;
+                        }
+
+                        string sourcesheetID = helper.GetSpreadsheetId(gdUrl);
+
+                        // 7. Определяем имя листа
+                        string worksheetId = helper.GetWorksheetByGid(gdUrl);
+                        var parts = worksheetId.Split('|');
+                        string spreadsheetId = parts[0];
+                        string sheetName = parts[1];
+
+                        // 8. Загружаем данные из таблицы
+                        var data = await helper.GetSheetData(sourcesheetID, $"{sheetName}!A1:Z1000");
+                        stats = AnalyzeSheetData(data);
                     }
-
-                    string sourcesheetID = helper.GetSpreadsheetId(gdUrl);
-
-                    // 7. Определяем имя листа
-                    string worksheetId = helper.GetWorksheetByGid(gdUrl);
-                    var parts = worksheetId.Split('|');
-                    string spreadsheetId = parts[0];
-                    string sheetName = parts[1];
-
-                    // 8. Загружаем данные из таблицы
-                    var data = await helper.GetSheetData(sourcesheetID, $"{sheetName}!A1:Z1000");
-                    var stats = AnalyzeSheetData(data);
-
+                    else 
+                    {
+                        stats = AnalyzeGridData(dataGridViewPreview);
+                    }
                     // 9. Достаём дату создания задачи
                     string date = extractor.ExtractIsoDate();
 
                     // 10. Строим ссылки на дефекты
-                    var urlsDefects = BuildDefectUrls(issueKey, date);
-
+                    var urlsDefects = await BuildDefectUrls(issueKey, date);
+                    
+                    checkBoxPreview.Checked = false;
                     // 11. Формируем отчёт
                     textBox1.Text = FormatReport(
                         regressionStats,
@@ -181,8 +207,8 @@ namespace UI_Testing
                         urls2,
                         sheetUrl,
                         stats,
-                        urlsDefects.Item1, // foundUrl
-                        urlsDefects.Item2  // knownUrl
+                        urlsDefects.foundBugsUrl, // foundUrl
+                        urlsDefects.knownBugsUrl  // knownUrl
                     );
                 }
             }
@@ -192,19 +218,21 @@ namespace UI_Testing
             }
         }
 
-        private (string foundBugsUrl, string knownBugsUrl) BuildDefectUrls(string issueKey, string date)
+        private async Task <(string foundBugsUrl, string knownBugsUrl)> BuildDefectUrls(string issueKey, string date)
         {
             string baseUrl = "https://jira.mos.social/issues/?jql=";
 
             string foundUrl = baseUrl + Uri.EscapeDataString($"issuetype in (Bug, Improvement, Task) AND createdDate >= {date} AND issue in linkedIssues({issueKey}) ORDER BY priority DESC");
             string knownUrl = baseUrl + Uri.EscapeDataString($"issuetype in (Bug, Improvement, Task) AND createdDate <= {date} AND issue in linkedIssues({issueKey}) ORDER BY priority DESC");
-
-            return (foundUrl, knownUrl);
+            var jira = new JiraClient(login, password);
+            string found = await jira.IssuesJiraReportAsync($"issuetype in (Bug, Improvement, Task) AND createdDate >= {date} AND issue in linkedIssues({issueKey}) ORDER BY priority DESC");
+            string know = await jira.IssuesJiraReportAsync($"issuetype in (Bug, Improvement, Task) AND createdDate <= {date} AND issue in linkedIssues({issueKey}) ORDER BY priority DESC");
+            return (found, know);
         }
         private string FormatReport(
             List<CycleTestStats> regressionStats,
             string productName,
-            string scopeUrl,string zni, List<string> urls,
+            string scopeUrl,string zni, List<RegressionInfo> urls,
             string gdUrl, SheetStats sheetStats, string foundUrl, string knownUrl)
         {
             var sb = new StringBuilder();
@@ -235,14 +263,14 @@ namespace UI_Testing
             {
                 if (urls.Count == 1)
                 {
-                    sb.AppendLine($"Функциональное тестирование в цикле: {urls[0]}");
+                    sb.AppendLine($"Функциональное тестирование в цикле: {urls[0].Url}");
                 }
                 else
                 {
                     sb.AppendLine("Функциональное тестирование в циклах:");
                     foreach (var url in urls)
                     {
-                        sb.AppendLine($"{url}");
+                        sb.AppendLine($"{url.Url}");
                     }
                 }
             }
@@ -370,41 +398,7 @@ namespace UI_Testing
         }
         private void FillPreviewTable(List<List<object>> rows, bool showPriority)
         {
-            dataGridViewPreview.Columns.Clear();
             dataGridViewPreview.Rows.Clear();
-
-            // Формируем список заголовков в зависимости от showPriority
-            List<string> headers;
-
-            if (showPriority)
-            {
-                headers = new List<string>
-                {
-                    "№", "Тип", "ТК", "Название", "Кол-во тестов",
-                    "Кол-во шагов", "Ревью ТК", "Приоритет", "Статус задачи", "Статус проверки", "Тестировщик"
-                };
-            }
-            else
-            {
-                // Приоритет удаляем, добавляем колонку "Комментарий"
-                headers = new List<string>
-                {
-                    "№", "Тип", "ТК", "Название", "Кол-во тестов",
-                    "Кол-во шагов", "Ревью ТК","Статус ТК", "Тестировщик", "Комментарий", "Статус задачи"
-                };
-            }
-
-            // Добавляем колонки
-            foreach (var header in headers)
-            {
-                var column = new DataGridViewTextBoxColumn
-                {
-                    HeaderText = header,
-                    Name = header,
-                    ReadOnly = false
-                };
-                dataGridViewPreview.Columns.Add(column);
-            }
 
             // Добавляем строки
             foreach (var row in rows)
@@ -438,31 +432,62 @@ namespace UI_Testing
 
                 dataGridViewPreview.Rows.Add(cells);
             }
-
-            // Настройки DataGridView
-            dataGridViewPreview.AllowUserToAddRows = true;
-            dataGridViewPreview.AllowUserToDeleteRows = true;
-            dataGridViewPreview.AllowUserToOrderColumns = true;
-            dataGridViewPreview.EditMode = DataGridViewEditMode.EditOnKeystrokeOrF2;
-            dataGridViewPreview.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridViewPreview.MultiSelect = true;
-            dataGridViewPreview.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            foreach (DataGridViewColumn column in dataGridViewPreview.Columns)
-            {
-                column.SortMode = DataGridViewColumnSortMode.NotSortable;
-            }
         }
 
-        private void checkBoxNoStyle_CheckedChanged(object sender, EventArgs e)
+        private async void checkBoxNoStyle_CheckedChanged(object sender, EventArgs e)
         {
-            textBoxStyleSheetUrl.Enabled = !checkBoxNoStyle.Checked;
-        }
+            if (!toolStripMenuItem2.Enabled)
+            {
+
+                if (checkBoxNoStyle.Checked)
+                {
+                    bool canProceed = await GoogleAuthorization.CanProceedAsync();
+
+                    if (!canProceed)
+                    {
+                        checkBoxNoStyle.Checked = false;
+                        return;
+                    }
+
+                    materialLabel1.Visible = true;
+                    textBoxSheetUrl.Visible = true;
+                }
+                else
+                {
+                    materialLabel1.Visible = false;
+                    textBoxSheetUrl.Visible = false;
+                }
+            }
+            if (!toolStripMenuItem5.Enabled)
+            {
+                if (checkBoxNoStyle.Checked)
+                {
+                    textBoxSheetUrl.Enabled = false;
+                }
+                else 
+                {
+                    textBoxSheetUrl.Enabled = true;
+                }
+            }
+            else
+            {
+                if (checkBoxNoStyle.Checked)
+                {
+                    textBoxStyleSheetUrl.Enabled = false;
+                }
+                else
+                {
+                    textBoxStyleSheetUrl.Enabled = true;
+                    textBoxSheetUrl.Enabled = true;
+                }
+            }}
+        
 
         private void materialCheckbox_CheckedChanged(object sender, EventArgs e)
         {
             bool showPriority = materialCheckbox.Checked;
             if(rows != null && checkBoxPreview.Checked) { 
-                FillPreviewTable(rows, showPriority); // currentRows — твои данные, которые ты передаёшь
+                FillPreviewTable(rows, showPriority);
             }
         }
 
@@ -486,67 +511,71 @@ namespace UI_Testing
             checkBoxIteration.Visible = true;
             checkBoxNoStyle.Visible = true;
             checkBoxPreview.Visible = true;
-            materialCheckbox.Visible = true;
+            materialCheckbox.Visible = false;
             dataGridViewPreview.Visible = true;
             toolStripMenuItem2.Enabled = true;
             toolStripMenuItem1.Enabled = false;
             toolStripMenuItem5.Enabled = true;
             toolStripMenuItem3.Enabled = true;
             tableLayoutPanel3.Visible = false;
-            materialLabel4.Visible = false;
-            checkBoxPreview.Enabled = true;
-            tableLayoutPanel2.Visible = false;
+            checkBoxPreview.Checked = true;
             materialCheckbox1.Visible = true;
             tableLayoutPanel1.Visible = true;
             textBox1.Visible = false;
-            textBox1.Enabled = false;
             materialButton2.Visible = true;
             materialButton2.Enabled = true;
             blocksTC.Visible = true;
             materialButton2.Text = "Выгрузка ГД";
+            checkBoxNoStyle.Checked = false;
+            materialLabel1.Text = "Ссылка на ГД";
+            checkBoxNoStyle.Text = "Без стиля";
             this.Text = "ГД";
         }
         private void toolStripMenuItem5_Click(object sender, EventArgs e)
         {
-            materialLabel1.Visible = false;
+            materialLabel1.Visible = true;
             materialLabel2.Visible = false;
             materialLabel3.Visible = true;
-            materialLabel3.Text = "Скоуп";
-            textBoxSheetUrl.Visible = false;
+            if (materialCheckbox.Checked)
+            {
+                materialLabel3.Text = "Скоуп";
+            }
+            else 
+            {
+                materialLabel3.Text = "Цикл";
+            }
+            textBoxSheetUrl.Visible = true;
             textBoxStyleSheetUrl.Visible = false;
             textBoxVersion.Visible = true;
             materialButton1.Visible = true;
             checkBoxIteration.Visible = true;
-            checkBoxNoStyle.Visible = false;
+            checkBoxNoStyle.Visible = true;
             checkBoxPreview.Visible = true;
             materialCheckbox.Visible = false;
             materialCheckbox.Checked = false;
             dataGridViewPreview.Visible = true;
             toolStripMenuItem2.Enabled = true;
-            оценкаToolStripMenuItem.Enabled = true;
             toolStripMenuItem1.Enabled = true;
             toolStripMenuItem5.Enabled = false;
             toolStripMenuItem3.Enabled = true;
             tableLayoutPanel3.Visible = false;
-            materialLabel4.Visible = false;
             checkBoxPreview.Enabled = true;
-            tableLayoutPanel2.Visible = false;
             materialCheckbox1.Visible = true;
             tableLayoutPanel1.Visible = true;
             textBox1.Visible = false;
-            textBox1.Enabled = false;
             materialButton2.Visible = true;
             materialButton2.Enabled = true;
             blocksTC.Visible = true;
+            checkBoxPreview.Checked = true;
+            dataGridViewPreview.Rows.Clear();
             materialButton2.Text = "Выгрузка ЯД";
+            checkBoxNoStyle.Text = "Из файла";
+            checkBoxNoStyle.Checked = false;
+            materialLabel1.Text = "cURL созданного листа";
             this.Text = "ЯД";
         }
         private async void toolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            bool canProceed = await GoogleAuthorization.CanProceedAsync();
-
-            if (!canProceed)
-                return;
 
             if (theFirst) 
             {
@@ -557,46 +586,45 @@ namespace UI_Testing
             }
 
             helper = new GoogleSheetsHelper();
-            materialLabel1.Visible = true;
             materialLabel2.Visible = false;
             materialLabel3.Visible = true;
             materialLabel3.Text = "Задача";
-            textBoxSheetUrl.Visible = true;
             textBoxStyleSheetUrl.Visible = false;
             textBoxVersion.Visible = true;
             materialButton1.Visible = true;
             checkBoxIteration.Visible = false;
-            checkBoxNoStyle.Visible = false;
+            checkBoxNoStyle.Visible = true;
             checkBoxPreview.Visible = true;
-            tableLayoutPanel2.Visible = false;
-            checkBoxPreview.Enabled = false;
+            checkBoxPreview.Enabled = true;
             materialCheckbox.Visible = false;
-            dataGridViewPreview.Visible = false;
+            dataGridViewPreview.Visible = true;
             toolStripMenuItem2.Enabled = false;
             toolStripMenuItem5.Enabled = true;
-            оценкаToolStripMenuItem.Enabled = true;
             checkBoxPreview.Checked = true;
             materialCheckbox1.Visible = false;
-            tableLayoutPanel1.Controls.Add(textBox1, 0, 4);
-            tableLayoutPanel1.SetColumnSpan(textBox1, 4);
-            textBox1.Visible = true;
-            textBox1.Enabled = true;
             materialButton2.Visible = false;
             materialButton2.Enabled = false;
             toolStripMenuItem1.Enabled = true;
             toolStripMenuItem3.Enabled = true;
-            materialLabel4.Visible = true;
             tableLayoutPanel3.Visible = false;
             tableLayoutPanel1.Visible = true;
             blocksTC.Visible = false;
+            checkBoxNoStyle.Checked = false;
+            checkBoxNoStyle.Text = "Из ГД";
             this.Text = "Отчет";
+            materialLabel1.Text = "Ссылка на ГД";
+            materialLabel1.Visible = false;
+            textBoxSheetUrl.Visible = false;
+            dataGridViewPreview.Rows.Clear();
+            tableLayoutPanel1.Controls.Add(textBox1, 0, 4);
+            tableLayoutPanel1.SetColumnSpan(textBox1, 4);
+            ThemeManager.ApplyThemeToControl(textBox1);
         }
 
         private void toolStripMenuItem3_Click(object sender, EventArgs e)
         {
             tableLayoutPanel3.Visible = false;
             tableLayoutPanel1.Visible = false;
-            tableLayoutPanel2.Visible = true;
             checkBoxNoStyle.Visible = false;
             checkBoxPreview.Visible = false;
             materialCheckbox.Visible = false;
@@ -605,16 +633,13 @@ namespace UI_Testing
             toolStripMenuItem2.Enabled = true;
             toolStripMenuItem1.Enabled = true;
             toolStripMenuItem5.Enabled = true;
-            оценкаToolStripMenuItem.Enabled = true;
             toolStripMenuItem3.Enabled = false;
-            materialLabel4.Visible = true;
             materialButton2.Visible = false;
             materialButton2.Enabled = false;
             checkBoxPreview.Enabled = false;
             textBox1.Visible= false;
             textBox1.Enabled= false;
             blocksTC.Visible = false;
-            materialLabel4.Text = "Спасибо что поинтересовались, функционал \"Поиск\" еще не реализован :(";
             this.Text = "Поиск";
         }
         private void toolStripMenuItem4_Click(object sender, EventArgs e)
@@ -627,11 +652,9 @@ namespace UI_Testing
             textBoxStyleSheetUrl.Visible = false;
             textBoxVersion.Visible = true;
             materialButton1.Visible = true;
-            оценкаToolStripMenuItem.Enabled = true;
             checkBoxIteration.Visible = false;
             checkBoxNoStyle.Visible = false;
             checkBoxPreview.Visible = true;
-            tableLayoutPanel2.Visible = false;
             checkBoxPreview.Enabled = false;
             materialCheckbox.Visible = false;
             dataGridViewPreview.Visible = false;
@@ -646,38 +669,12 @@ namespace UI_Testing
             toolStripMenuItem1.Enabled = true;
             toolStripMenuItem3.Enabled = true;
             toolStripMenuItem2.Enabled = true;
-            materialLabel4.Visible = true;
             tableLayoutPanel3.Visible = false;
             tableLayoutPanel1.Visible = true;
             blocksTC.Visible = false;
             this.Text = "Верификация";
         }
 
-        private void оценкаToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            tableLayoutPanel3.Visible = false;
-            tableLayoutPanel1.Visible = false;
-            tableLayoutPanel2.Visible = true;
-            checkBoxNoStyle.Visible = false;
-            checkBoxPreview.Visible = false;
-            materialCheckbox.Visible = false;
-            dataGridViewPreview.Visible = false;
-            materialCheckbox1.Visible = false;
-            toolStripMenuItem2.Enabled = true;
-            toolStripMenuItem1.Enabled = true;
-            toolStripMenuItem5.Enabled = true;
-            toolStripMenuItem3.Enabled = true;
-            оценкаToolStripMenuItem.Enabled = false;
-            materialLabel4.Visible = true;
-            materialButton2.Visible = false;
-            materialButton2.Enabled = false;
-            checkBoxPreview.Enabled = false;
-            textBox1.Visible = false;
-            textBox1.Enabled = false;
-            blocksTC.Visible = false;
-            materialLabel4.Text = "Спасибо что поинтересовались, функционал \"Оценка\" еще не реализован :(";
-            this.Text = "Оценка";
-        }
         private async void materialButton2_Click(object sender, EventArgs e)
         {
             try
@@ -748,8 +745,16 @@ namespace UI_Testing
                     {
                         rows = await ExportTestCasesFromUrl(version);
                     }
-
-                    var curl = CurlParser.Parse("curl.txt");
+                    string curlText = textBoxSheetUrl.Text;
+                    var curl = new CurlRequest();
+                    if (checkBoxNoStyle.Checked)
+                    {
+                        curl = CurlParser.ParseFromFile("curl.txt");
+                    }
+                    {
+                        if (curlText == "") { MaterialMessageBox.Show(this, "Заполните поле \"cURL созданного листа\""); return; }
+                        curl = CurlParser.Parse(curlText);
+                    }
                     // 1. Получаем timeline и snapshot
                     var (timeline, snapshotIndex) = await GetStyles.GetSessionInfo(curl);
                     curl.Timeline = timeline;
@@ -874,19 +879,13 @@ namespace UI_Testing
         }
         private SheetStats AnalyzeSheetData(IList<IList<object>> data)
         {
-            if (data == null || data.Count < 2)
-            {
-                MaterialMessageBox.Show(this, "Недостаточно данных для анализа.");
-                return null;
-            }
-
             var header = data[0].Select(c => c.ToString().Trim()).ToList();
             int statusIndex = header.FindIndex(h => h.IndexOf("Статус задачи", StringComparison.OrdinalIgnoreCase) >= 0);
             int testStatusIndex = header.FindIndex(h =>
                 h.IndexOf("Статус теста", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 h.IndexOf("Статус ТК", StringComparison.OrdinalIgnoreCase) >= 0 || h.IndexOf("Статус проверки", StringComparison.OrdinalIgnoreCase) >= 0);
 
-            int linkIndex = 2;               // "ID задачи" всегда колонка 0
+            int linkIndex = 2;               // "Ссылка" всегда колонка 2
             int testCountIndex = 4;          // "Количество тестов" всегда колонка 4
             int fifthIndex = header.Count > 4 ? 4 : -1;
             int reviewIndex = 6; // "Проведено ревью тест-кейсов" — всегда колонка 7
@@ -975,17 +974,143 @@ namespace UI_Testing
 
             return stats;
         }
-        private void checkBoxPreview_CheckedChanged(object sender, EventArgs e)
+
+        private SheetStats AnalyzeGridData(DataGridView grid)
         {
-            if (checkBoxPreview.Checked)
+            var stats = new SheetStats();
+
+            const int numberIndex = 0;       // №
+            const int typeIndex = 1;         // Тип
+            const int linkIndex = 2;         // ТК
+            const int testCountIndex = 4;    // Кол-во тестов
+            const int reviewIndex = 6;       // Ревью ТК
+            const int testStatusIndex = 7;   // Статус ТК
+            const int statusIndex = 10;      // Статус задачи
+
+            foreach (DataGridViewRow row in grid.Rows)
             {
-                materialButton1.Enabled = true;
+                if (row.IsNewRow)
+                    continue;
+
+                string status =
+                    row.Cells[statusIndex]?.Value?.ToString()?.Trim() ?? "";
+
+                string testStatus =
+                    row.Cells[testStatusIndex]?.Value?.ToString()?.Trim() ?? "";
+
+                string taskId =
+                    row.Cells[linkIndex]?.Value?.ToString()?.Trim() ?? "";
+
+                string reviewStatus =
+                    row.Cells[reviewIndex]?.Value?.ToString()?.Trim() ?? "";
+
+                double testCount =
+                    double.TryParse(
+                        row.Cells[testCountIndex]?.Value?.ToString(),
+                        out var val)
+                        ? val
+                        : 0;
+
+                // Ревью
+                if (reviewStatus == "Активный"
+                    || reviewStatus == "Требует обновления"
+                    || reviewStatus == "Устарело" || reviewStatus == "Active")
+                {
+                    stats.ReviewedTestCases++;
+                }
+
+                // Общее количество задач
+                if (int.TryParse(
+                    row.Cells[numberIndex]?.Value?.ToString(),
+                    out int num))
+                {
+                    stats.TotalTasks = Math.Max(stats.TotalTasks, num);
+                }
+
+                // Закрытые
+                if (status == "Waiting for Release"
+                    || status == "Documentation"
+                    || status == "Closed"
+                    || status == "Close")
+                {
+                    if (!string.IsNullOrWhiteSpace(taskId) && testCount == 0)
+                    {
+                        string nextType = "";
+
+                        if (row.Index + 1 < grid.Rows.Count)
+                        {
+                            nextType =
+                                grid.Rows[row.Index + 1]
+                                    .Cells[typeIndex]
+                                    ?.Value
+                                    ?.ToString()
+                                    ?.Trim() ?? "";
+                        }
+
+                        if (!nextType.Equals(
+                            "Test case",
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            stats.UntestedTaskLinks.Add(
+                                $"https://jira.mos.social/browse/{taskId} передана закрытой");
+                        }
+                        else
+                        {
+                            stats.ClosedTasks++;
+                        }
+                    }
+                    else
+                    {
+                        stats.ClosedTasks++;
+                    }
+                }
+
+                // Переоткрытые
+                if (status == "Reopened"
+                    || status == "Reopen")
+                {
+                    stats.ReopenedTasks++;
+                }
+
+                // Тех задачи
+                if (status == "Resolved"
+                    && !string.IsNullOrWhiteSpace(taskId)
+                    && testCount == 0)
+                {
+                    stats.UntestedTaskLinks.Add(
+                        $"https://jira.mos.social/browse/{taskId} тех задача");
+                }
+
+                // Статистика тестов
+                switch (testStatus)
+                {
+                    case "Pass":
+                    case "Passed":
+                        stats.Passed += (int)testCount;
+                        break;
+
+                    case "Pass with bug":
+                        stats.PassedWithBug += (int)testCount;
+                        break;
+
+                    case "Fail":
+                    case "Failed":
+                        stats.Failed += (int)testCount;
+                        break;
+
+                    case "Blocked":
+                        stats.Blocked += (int)testCount;
+                        break;
+                }
+
+                // Плановые ТК
+                if ((int)testCount <= 1)
+                {
+                    stats.PlannedTestCases += (int)testCount;
+                }
             }
-            else {
-                dataGridViewPreview.Columns.Clear();
-                dataGridViewPreview.Rows.Clear();
-                materialButton1.Enabled = false;
-            }
+
+            return stats;
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -1410,7 +1535,7 @@ namespace UI_Testing
         private string GetExcelColumnName(int columnNumber)
         {
             string columnName = "";
-            while (columnNumber > 0)
+            while (columnNumber > 0) 
             {
                 int remainder = (columnNumber - 1) % 26;
                 columnName = (char)(65 + remainder) + columnName;
@@ -1421,8 +1546,183 @@ namespace UI_Testing
 
         private void дляТМToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AdminForm adminForm = new AdminForm(login,password);
-            adminForm.ShowDialog();
+            this.Hide(); // скрываем главное окно
+            using (AdminForm adminForm = new AdminForm(login, password))
+            {
+                ThemeManager.ApplyThemeToForm(adminForm);
+                adminForm.ShowDialog(this); // модальное окно с указанием владельца
+            }
+            this.Show(); // после закрытия диалога показываем главное окно
+        }
+
+        private void dataGridViewPreview_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.V)
+            {
+                PasteFromClipboard();
+            }
+        }
+        private void PasteFromClipboard()
+        {
+            string clipboard = Clipboard.GetText();
+
+            if (string.IsNullOrWhiteSpace(clipboard))
+                return;
+
+            string[] rows = clipboard.Split(
+                new[] { "\r\n", "\n" },
+                StringSplitOptions.RemoveEmptyEntries);
+
+            int startRow = 0;
+            int startCol = 0;
+
+            // Сначала добавляем все строки
+            int needRows = startRow + rows.Length;
+
+            while (dataGridViewPreview.Rows.Count < needRows)
+            {
+                dataGridViewPreview.Rows.Add();
+            }
+
+            // Потом заполняем
+            for (int i = 0; i < rows.Length; i++)
+            {
+                string[] cells = rows[i].Split('\t');
+
+                DataGridViewRow row =
+                    dataGridViewPreview.Rows[startRow + i];
+
+                for (int j = 0; j < cells.Length; j++)
+                {
+                    if (startCol + j >= dataGridViewPreview.Columns.Count)
+                        break;
+
+                    row.Cells[startCol + j].Value = cells[j];
+                }
+            }
+
+            // Принудительно обновляем отображение
+            dataGridViewPreview.EndEdit();
+            dataGridViewPreview.Refresh();
+        }
+
+        private void checkBoxPreview_CheckedChanged_1(object sender, EventArgs e)
+        {
+            if (!toolStripMenuItem2.Enabled)
+            {
+                if (!checkBoxPreview.Checked)
+                {
+                    materialButton1.Enabled = true;
+                    textBox1.Visible = true;
+                    textBox1.Enabled = true;
+                    dataGridViewPreview.Visible = false;
+                }
+                else
+                {
+                    materialButton1.Enabled = true;
+                    textBox1.Visible = false;
+                    textBox1.Enabled = false;
+                    dataGridViewPreview.Visible = true;
+                }
+            }
+            else 
+            {
+                if (checkBoxPreview.Checked)
+                {
+                    materialButton1.Enabled = true;
+                    dataGridViewPreview.AllowUserToAddRows = true;
+                    dataGridViewPreview.AllowUserToDeleteRows = true;
+                    dataGridViewPreview.Enabled = true;
+                }
+                else
+                {
+                    materialButton1.Enabled = false;
+                    dataGridViewPreview.AllowUserToAddRows = false;
+                    dataGridViewPreview.AllowUserToDeleteRows = false;
+                    dataGridViewPreview.Enabled = false;
+                }
+            }
+        }
+
+        private void textBoxSheetUrl_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.V)
+            {
+                e.SuppressKeyPress = true; // отключаем стандартную вставку
+
+                string clipboardText = Clipboard.GetText();
+                if (!string.IsNullOrEmpty(clipboardText))
+                {
+                    string singleLine = ConvertCurlToSingleLine(clipboardText);
+                    InsertText(sender as TextBoxBase, singleLine);
+                }
+            }
+        }
+        private string ConvertCurlToSingleLine(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+
+            // Разбиваем на строки
+            string[] lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                // Убираем пробелы и табы в конце строки
+                lines[i] = lines[i].TrimEnd();
+                // Если строка заканчивается на обратный слеш – удаляем его
+                if (lines[i].EndsWith("\\"))
+                    lines[i] = lines[i].Substring(0, lines[i].Length - 1);
+            }
+
+            // Собираем обратно, склеивая через пробел
+            return string.Join(" ", lines);
+        }
+        private void InsertText(TextBoxBase textBox, string text)
+        {
+            int start = textBox.SelectionStart;
+            int length = textBox.SelectionLength;
+
+            // Удаляем выделенный текст (если есть)
+            textBox.Text = textBox.Text.Remove(start, length);
+            // Вставляем новый текст
+            textBox.Text = textBox.Text.Insert(start, text);
+            // Устанавливаем курсор после вставленного текста
+            textBox.SelectionStart = start + text.Length;
+            textBox.SelectionLength = 0;
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            // Загружаем сохранённую тему
+            string savedTheme = Properties.Settings.Default.Theme;
+            bool isDark = (savedTheme == "Dark");
+
+            // Устанавливаем переключатель (если есть)
+            if (themeSwitch != null)
+            {
+                themeSwitch.Checked = isDark;
+                // Но событие CheckedChanged вызовется, нужно отключить его временно
+                themeSwitch.CheckedChanged -= themeSwitch_CheckedChanged; // отписываем
+                themeSwitch.Checked = isDark;
+                themeSwitch.CheckedChanged += themeSwitch_CheckedChanged;
+            }
+            ThemeMode mode = themeSwitch.Checked ? ThemeMode.Dark : ThemeMode.Light;
+            // Применяем тему к самой форме и всем контролам
+            ThemeManager.SetTheme(isDark ? ThemeMode.Dark : ThemeMode.Light);
+            if (menuStrip != null)
+                ThemeManager.ApplyThemeToMenuStrip(menuStrip, mode);
+        }
+
+        private void themeSwitch_CheckedChanged(object sender, EventArgs e)
+        {
+            ThemeMode mode = themeSwitch.Checked ? ThemeMode.Dark : ThemeMode.Light;
+            ThemeManager.SetTheme(mode);
+
+            if (menuStrip != null)
+                ThemeManager.ApplyThemeToMenuStrip(menuStrip, mode);
+
+            Properties.Settings.Default.Theme = mode.ToString();
+            Properties.Settings.Default.Save();
         }
     }
     public class SheetStats

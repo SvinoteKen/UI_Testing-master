@@ -1,19 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Security.Cryptography;
-using System.Text;
 using System.Windows.Forms;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using MaterialSkin.Controls;
-using MaterialSkin;
-using UI_Testing;
 using Google.Apis.Auth.OAuth2;
 using System.Threading;
 using Google.Apis.Util.Store;
-using Google.Apis.Util;
 
 namespace UI_Testing
 {
@@ -35,7 +27,7 @@ namespace UI_Testing
             if (!IsAdminAllowed())
             {
                 MaterialMessageBox.Show(Application.OpenForms[1],
-                    "У вас нет прав на просмотр этого раздела.\nОбратитесь к администратору за доступом.\nTelegram: https://t.me/DI_KEN9",
+                    "У вас нет прав на просмотр или взаимодействие с функционалом этого раздела.\nОбратитесь к администратору за доступом.\nTelegram: https://t.me/DI_KEN9",
                     "Доступ запрещён",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
